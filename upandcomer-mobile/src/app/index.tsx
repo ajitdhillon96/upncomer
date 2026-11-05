@@ -362,7 +362,7 @@ export default function HomeScreen() {
             <Text style={styles.promoDescription}>
               Grow your business and connect with new customers.
             </Text>
-            <Pressable style={styles.promoButton}>
+            <Pressable style={styles.promoButton} onPress={() => setExperience('business')}>
               <Text style={styles.promoButtonText}>Become a provider  →</Text>
             </Pressable>
           </View>
