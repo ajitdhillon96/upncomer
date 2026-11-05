@@ -35,6 +35,7 @@
       ]
     ],
     "experiments": {
+        "baseUrl": "/upncomer",
       "typedRoutes": true,
       "reactCompiler": true
     }
