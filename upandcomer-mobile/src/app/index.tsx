@@ -96,7 +96,7 @@ export default function HomeScreen() {
           </View>
           <View style={styles.choiceIntro}>
             <Text style={styles.eyebrow}>WELCOME TO UP&COMER</Text>
-            <Text style={styles.choiceHeading}>What brings{ '\\n' }you here?</Text>
+            <Text style={styles.choiceHeading}>What brings{ '\n' }you here?</Text>
             <Text style={styles.choiceSubheading}>Choose how you'd like to use the marketplace.</Text>
           </View>
           <Pressable
@@ -146,7 +146,7 @@ export default function HomeScreen() {
         </View>
         <ScrollView contentContainerStyle={styles.businessContent}>
           <Text style={styles.eyebrow}>YOUR BUSINESS STARTS HERE</Text>
-          <Text style={styles.heading}>Turn your talent{ '\\n' }into opportunity.</Text>
+          <Text style={styles.heading}>Turn your talent{ '\n' }into opportunity.</Text>
           <Text style={styles.subheading}>Build your presence, meet new customers, and grow your business with Up&comer.</Text>
           <View style={styles.businessWelcomeCard}>
             <Text style={styles.businessCardTitle}>Welcome, future business owner.</Text>
