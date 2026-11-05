@@ -55,7 +55,8 @@ const providers = [
 ];
 
 export default function HomeScreen() {
-    const [search, setSearch] = useState('');
+  const [experience, setExperience] = useState<'choice' | 'customer' | 'business'>('choice');
+  const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const query = search.trim().toLowerCase();
@@ -83,6 +84,84 @@ export default function HomeScreen() {
 
 
   const showProviders = selectedCategory !== null || query.length > 0;
+
+  if (experience === 'choice') {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <StatusBar barStyle="light-content" />
+        <View style={styles.choiceScreen}>
+          <View style={styles.choiceBrand}>
+            <Text style={styles.logo}>up<Text style={styles.logoPurple}>&</Text>comer.</Text>
+            <Text style={styles.tagline}>LOCAL TALENT, BIG POTENTIAL</Text>
+          </View>
+          <View style={styles.choiceIntro}>
+            <Text style={styles.eyebrow}>WELCOME TO UP&COMER</Text>
+            <Text style={styles.choiceHeading}>What brings{ '\\n' }you here?</Text>
+            <Text style={styles.choiceSubheading}>Choose how you'd like to use the marketplace.</Text>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Continue as a customer"
+            style={styles.choiceCard}
+            onPress={() => setExperience('customer')}
+          >
+            <View style={styles.choiceIcon}><Text style={styles.choiceIconText}>⌕</Text></View>
+            <View style={styles.choiceCopy}>
+              <Text style={styles.choiceTitle}>I'm a Customer</Text>
+              <Text style={styles.choiceDescription}>Discover and book talented local service providers.</Text>
+            </View>
+            <Text style={styles.choiceArrow}>→</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Continue as a business"
+            style={[styles.choiceCard, styles.businessChoiceCard]}
+            onPress={() => setExperience('business')}
+          >
+            <View style={styles.choiceIcon}><Text style={styles.choiceIconText}>↗</Text></View>
+            <View style={styles.choiceCopy}>
+              <Text style={styles.choiceTitle}>I'm a Business</Text>
+              <Text style={styles.choiceDescription}>Showcase your services, connect with customers, and grow.</Text>
+            </View>
+            <Text style={styles.choiceArrow}>→</Text>
+          </Pressable>
+          <Text style={styles.choiceFootnote}>ONE MARKETPLACE. TWO DISTINCT EXPERIENCES.</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (experience === 'business') {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <StatusBar barStyle="light-content" />
+        <View style={styles.businessHeader}>
+          <View>
+            <Text style={styles.logo}>up<Text style={styles.logoPurple}>&</Text>comer.</Text>
+            <Text style={styles.tagline}>BUSINESS</Text>
+          </View>
+          <Pressable style={styles.switchButton} onPress={() => setExperience('choice')}>
+            <Text style={styles.switchButtonText}>Switch experience</Text>
+          </Pressable>
+        </View>
+        <ScrollView contentContainerStyle={styles.businessContent}>
+          <Text style={styles.eyebrow}>YOUR BUSINESS STARTS HERE</Text>
+          <Text style={styles.heading}>Turn your talent{ '\\n' }into opportunity.</Text>
+          <Text style={styles.subheading}>Build your presence, meet new customers, and grow your business with Up&comer.</Text>
+          <View style={styles.businessWelcomeCard}>
+            <Text style={styles.businessCardTitle}>Welcome, future business owner.</Text>
+            <Text style={styles.businessCardText}>Your business profile and service listings will live here. We're building the tools to help you get discovered and manage your bookings.</Text>
+          </View>
+          <Pressable style={styles.businessPrimaryButton} onPress={() => {}}>
+            <Text style={styles.businessPrimaryButtonText}>Business registration — coming next</Text>
+          </Pressable>
+          <Pressable style={styles.backToChoice} onPress={() => setExperience('choice')}>
+            <Text style={styles.backToChoiceText}>‹  Back to account type</Text>
+          </Pressable>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -259,6 +338,157 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  choiceScreen: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 28,
+  },
+  choiceBrand: {
+    alignItems: 'center',
+    marginBottom: 58,
+  },
+  choiceIntro: {
+    marginBottom: 27,
+  },
+  choiceHeading: {
+    color: '#FFFFFF',
+    fontSize: 38,
+    lineHeight: 43,
+    fontWeight: '900',
+    letterSpacing: -1.5,
+    marginTop: 8,
+  },
+  choiceSubheading: {
+    color: '#A39EAA',
+    fontSize: 13,
+    marginTop: 10,
+    lineHeight: 20,
+  },
+  choiceCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1D1C23',
+    borderWidth: 1,
+    borderColor: '#514568',
+    borderRadius: 16,
+    padding: 17,
+    marginBottom: 13,
+    minHeight: 112,
+  },
+  businessChoiceCard: {
+    backgroundColor: '#211C2D',
+    borderColor: '#715A99',
+  },
+  choiceIcon: {
+    width: 43,
+    height: 43,
+    borderRadius: 13,
+    backgroundColor: '#332B43',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 13,
+  },
+  choiceIconText: {
+    color: PURPLE,
+    fontSize: 25,
+    fontWeight: '700',
+  },
+  choiceCopy: {
+    flex: 1,
+  },
+  choiceTitle: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 5,
+  },
+  choiceDescription: {
+    color: '#AAA5B3',
+    fontSize: 11,
+    lineHeight: 17,
+  },
+  choiceArrow: {
+    color: PURPLE,
+    fontSize: 23,
+    marginLeft: 8,
+  },
+  choiceFootnote: {
+    color: '#77727F',
+    fontSize: 8,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+    textAlign: 'center',
+    marginTop: 28,
+  },
+  businessHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 17,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#292730',
+  },
+  switchButton: {
+    borderWidth: 1,
+    borderColor: '#514568',
+    borderRadius: 9,
+    paddingHorizontal: 11,
+    paddingVertical: 9,
+  },
+  switchButtonText: {
+    color: PURPLE,
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  businessContent: {
+    paddingHorizontal: SIDE,
+    paddingTop: 32,
+    paddingBottom: 40,
+  },
+  businessWelcomeCard: {
+    backgroundColor: CARD,
+    borderWidth: 1,
+    borderColor: '#514568',
+    borderRadius: 15,
+    padding: 20,
+    marginTop: 18,
+  },
+  businessCardTitle: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  businessCardText: {
+    color: '#AAA5B3',
+    fontSize: 12,
+    lineHeight: 19,
+    marginTop: 9,
+  },
+  businessPrimaryButton: {
+    backgroundColor: PURPLE,
+    borderRadius: 10,
+    padding: 15,
+    alignItems: 'center',
+    marginTop: 18,
+  },
+  businessPrimaryButtonText: {
+    color: '#17121F',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  backToChoice: {
+    alignSelf: 'center',
+    marginTop: 25,
+    padding: 10,
+  },
+  backToChoiceText: {
+    color: PURPLE,
+    fontSize: 12,
+    fontWeight: '700',
+  },
   safe: {
     flex: 1,
     backgroundColor: BG,
