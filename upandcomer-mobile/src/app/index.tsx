@@ -1,191 +1,558 @@
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
   TextInput,
-  ScrollView,
   StyleSheet,
+  ScrollView,
+  Image,
   Pressable,
+  SafeAreaView,
+  Dimensions,
   StatusBar,
 } from 'react-native';
 
+const { width } = Dimensions.get('window');
+const SIDE = 18;
+const GAP = 10;
+const TILE_WIDTH = (width - SIDE * 2 - GAP * 2) / 3;
+const PURPLE = '#A78BFA';
+const BG = '#101014';
+const CARD = '#1D1C23';
+
+const photo = (id: string) =>
+  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=600&q=90`;
+
 const categories = [
-  { name: 'All', icon: '✨' },
-  { name: 'Hair', icon: '💇' },
-  { name: 'Moving', icon: '📦' },
-  { name: 'Lawn Care', icon: '🌱' },
-  { name: 'Auto', icon: '🚗' },
-  { name: 'Fitness', icon: '🏋️' },
+  { name: 'Hair', image: 'photo-1560066984-138dadb4c035' },
+  { name: 'Moving', image: 'photo-1600518464441-9154a4dea21b' },
+  { name: 'Auto Care', image: 'photo-1492144534655-ae79c964c9d7' },
+  { name: 'Fitness', image: 'photo-1534438327276-14e5300c3a48' },
+  { name: 'Lawn Care', image: 'photo-1558618666-fcd25c85cd64' },
+  { name: 'Photography', image: 'photo-1542038784456-1ea8e935640e' },
+  { name: 'Cleaning', image: 'photo-1581578731548-c64695cc6952' },
+  { name: 'Junk Removal', image: 'photo-1519003722824-194d4455a60c' },
+  { name: 'Beauty', image: 'photo-1522335789203-aabd1fc54bc9' },
+  { name: 'Handyman', image: 'photo-1581244277943-fe4a9c777189' },
+  { name: 'Pet Care', image: 'photo-1450778869180-41d0601e046e' },
+  { name: 'Personal Chef', image: 'photo-1556911220-e15b29be8c8f' },
+  { name: 'Painting', image: 'photo-1562259949-e8e7689d7828' },
+  { name: 'Music', image: 'photo-1516280440614-37939bbacd81' },
+  { name: 'Event Planning', image: 'photo-1511795409834-ef04bbd61622' },
+  { name: 'Interior Design', image: 'photo-1600210492486-724fe5c67fb0' },
+  { name: 'Carpentry', image: 'photo-1504148455328-c376907d081c' },
+  { name: 'Massage', image: 'photo-1544161515-4ab6ce6db874' },
+  { name: 'Dance', image: 'photo-1504609813442-a8924e83f76e' },
+  { name: 'Other Services', image: 'photo-1521737711867-e3b97375f902' },
+  { name: 'Tutoring', image: 'photo-1503676260728-1c00da094a0b' },
 ];
 
 const providers = [
-  { name: 'Marcus Johnson', service: 'Professional Haircuts', category: 'Hair', price: '$25', rating: '4.9', initials: 'MJ', color: '#DCE9D8' },
-  { name: 'GreenScape Services', service: 'Lawn Care & Maintenance', category: 'Lawn Care', price: '$45', rating: '5.0', initials: 'GS', color: '#E8E5D5' },
-  { name: 'Alex Rivera', service: 'Car Detailing', category: 'Auto', price: '$60', rating: '4.8', initials: 'AR', color: '#DDE6EC' },
-  { name: 'Jordan Fitness', service: 'Personal Training', category: 'Fitness', price: '$35', rating: '5.0', initials: 'JF', color: '#E9DFE9' },
+  { name: 'Jordan Williams', service: 'Barber & Hair Stylist', category: 'Hair', price: '$35', rating: '4.9', image: 'photo-1500648767791-00dcc994a43e' },
+  { name: 'Taylor Morgan', service: 'Independent Stylist', category: 'Hair', price: '$45', rating: '4.8', image: 'photo-1534528741775-53994a69daeb' },
+  { name: 'Alex Rivera', service: 'Personal Trainer', category: 'Fitness', price: '$30', rating: '5.0', image: 'photo-1506794778202-cad84cf45f1d' },
+  { name: 'Sam Carter', service: 'Moving Specialist', category: 'Moving', price: '$50', rating: '4.9', image: 'photo-1531123897727-8f129e1688ce' },
+  { name: 'Jamie Lee', service: 'Auto Detailer', category: 'Auto Care', price: '$40', rating: '4.7', image: 'photo-1507003211169-0a1dd7228f2d' },
+  { name: 'Casey Brooks', service: 'Fitness Coach', category: 'Fitness', price: '$55', rating: '4.9', image: 'photo-1524504388940-b1c1722653e1' },
 ];
 
 export default function HomeScreen() {
-  const [selected, setSelected] = useState('All');
   const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const filtered = providers.filter((provider) => {
-    const matchesCategory = selected === 'All' || provider.category === selected;
-    const matchesSearch = `${provider.name} ${provider.service}`.toLowerCase().includes(search.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const query = search.trim().toLowerCase();
+
+  const filteredCategories = useMemo(() => {
+    return categories.filter(item =>
+      item.name.toLowerCase().includes(query)
+    );
+  }, [query]);
+
+  const filteredProviders = useMemo(() => {
+    return providers.filter(item => {
+      const matchesCategory =
+        !selectedCategory || item.category === selectedCategory;
+
+      const matchesSearch =
+        !query ||
+        item.name.toLowerCase().includes(query) ||
+        item.service.toLowerCase().includes(query) ||
+        item.category.toLowerCase().includes(query);
+
+      return matchesCategory && matchesSearch;
+    });
+  }, [query, selectedCategory]);
+
+
+  const showProviders = selectedCategory !== null || query.length > 0;
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8F8F2" />
+    <SafeAreaView style={styles.safe}>
+      <StatusBar barStyle="light-content"/>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.logo}>up<Text style={styles.logoAccent}>&</Text>comer.</Text>
-            <Text style={styles.tagline}>Discover talent. Support ambition.</Text>
-          </View>
-          <Pressable style={styles.location}>
-            <Text style={styles.locationIcon}>📍</Text>
-            <Text style={styles.locationText}>Los Angeles</Text>
-            <Text style={styles.chevron}>⌄</Text>
-          </Pressable>
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.logo}>
+            up<Text style={styles.logoPurple}>&</Text>comer.
+          </Text>
+          <Text style={styles.tagline}>DISCOVER LOCAL TALENT</Text>
         </View>
+        <Pressable style={styles.profileButton}>
+          <Text style={styles.profileInitial}>U</Text>
+        </Pressable>
+      </View>
 
-        <View style={styles.hero}>
-          <Text style={styles.eyebrow}>THE NEXT BIG THING STARTS LOCAL</Text>
-          <Text style={styles.heroTitle}>Discover your next{'\n'}favorite <Text style={styles.heroGreen}>local pro.</Text></Text>
-          <Text style={styles.heroDescription}>
-            Find rising talent in your neighborhood. Great service, honest prices.
+      <ScrollView
+        style={styles.mainScroll}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.content}>
+          <Text style={styles.eyebrow}>YOUR LOCAL MARKETPLACE</Text>
+          <Text style={styles.heading}>
+            Find your next{'\n'}
+            <Text style={styles.headingAccent}>favorite.</Text>
+          </Text>
+          <Text style={styles.subheading}>
+            Discover talented people and services near you.
           </Text>
 
           <View style={styles.searchBox}>
             <Text style={styles.searchIcon}>⌕</Text>
             <TextInput
               style={styles.searchInput}
-              placeholder="What service are you looking for?"
-              placeholderTextColor="#92958B"
+              placeholder="Search services or providers..."
+              placeholderTextColor="#85818E"
               value={search}
               onChangeText={setSearch}
+              returnKeyType="search"
+              autoCorrect={false}
             />
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeading}>
-            <Text style={styles.sectionTitle}>Explore categories</Text>
-            <Text style={styles.sectionSubtitle}>Find the right person for the job.</Text>
-          </View>
-
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryRow}>
-            {categories.map((category) => (
-              <Pressable
-                key={category.name}
-                onPress={() => setSelected(category.name)}
-                style={[styles.category, selected === category.name && styles.categoryActive]}
-              >
-                <Text style={styles.categoryIcon}>{category.icon}</Text>
-                <Text style={[styles.categoryName, selected === category.name && styles.categoryNameActive]}>
-                  {category.name}
-                </Text>
+            {search.length > 0 && (
+              <Pressable onPress={() => setSearch('')}>
+                <Text style={styles.clearSearch}>✕</Text>
               </Pressable>
-            ))}
-          </ScrollView>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeading}>
-            <Text style={styles.sectionTitle}>Rising local talent</Text>
-            <Text style={styles.sectionSubtitle}>Get quality service while supporting someone on the rise.</Text>
+            )}
           </View>
 
-          {filtered.length === 0 ? (
-            <Text style={styles.empty}>No providers found. Try another search.</Text>
-          ) : (
-            filtered.map((provider) => (
-              <Pressable key={provider.name} style={styles.providerCard}>
-                <View style={[styles.avatar, { backgroundColor: provider.color }]}>
-                  <Text style={styles.avatarText}>{provider.initials}</Text>
-                </View>
-                <View style={styles.providerInfo}>
-                  <Text style={styles.providerName}>{provider.name}</Text>
-                  <Text style={styles.providerService}>{provider.service}</Text>
-                  <Text style={styles.rating}>★ {provider.rating}  ·  Local rising talent</Text>
-                </View>
-                <View style={styles.priceContainer}>
-                  <Text style={styles.price}>{provider.price}</Text>
-                  <Text style={styles.priceLabel}>from</Text>
-                </View>
-              </Pressable>
-            ))
+          {selectedCategory && (
+            <Pressable
+              onPress={() => {
+                setSelectedCategory(null);
+                setSearch('');
+              }}
+              style={styles.backButton}
+            >
+              <Text style={styles.backText}>‹  All categories</Text>
+            </Pressable>
           )}
-        </View>
 
-        <View style={styles.callout}>
-          <Text style={styles.calloutEyebrow}>YOUR TALENT. YOUR BUSINESS.</Text>
-          <Text style={styles.calloutTitle}>Ready to get discovered?</Text>
-          <Text style={styles.calloutText}>Turn your skills into your next opportunity.</Text>
-          <Pressable style={styles.calloutButton}>
-            <Text style={styles.calloutButtonText}>Become a provider  →</Text>
-          </Pressable>
-        </View>
+          {showProviders ? (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>
+                {selectedCategory || 'Search results'}
+              </Text>
+              <Text style={styles.sectionSubtitle}>
+                {filteredProviders.length} sample providers
+              </Text>
 
-        <View style={styles.footer}>
-          <Text style={styles.footerLogo}>up&comer.</Text>
-          <Text style={styles.footerText}>Support local. Discover what's next.</Text>
+              {filteredProviders.length > 0 ? (
+                <View style={styles.providerGrid}>
+                  {filteredProviders.map(provider => (
+                    <Pressable
+                      key={provider.name}
+                      style={styles.providerCard}
+                    >
+                      <Image
+                        source={{ uri: photo(provider.image) }}
+                        style={styles.providerImage}
+                      />
+                      <Text style={styles.providerName}>{provider.name}</Text>
+                      <Text style={styles.providerService}>
+                        {provider.service}
+                      </Text>
+                      <View style={styles.providerBottom}>
+                        <Text style={styles.providerPrice}>
+                          From ${provider.price}
+                        </Text>
+                        <Text style={styles.rating}>★ {provider.rating}</Text>
+                      </View>
+                    </Pressable>
+                  ))}
+                </View>
+              ) : (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyTitle}>No matches yet</Text>
+                  <Text style={styles.emptyText}>
+                    Try another search or browse all categories.
+                  </Text>
+                </View>
+              )}
+            </View>
+          ) : (
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View>
+                  <Text style={styles.sectionTitle}>Explore categories</Text>
+                  <Text style={styles.sectionSubtitle}>
+                    Find the right person for the job.
+                  </Text>
+                </View>
+                <Text style={styles.countLabel}>
+                  {filteredCategories.length} SERVICES
+                </Text>
+              </View>
+
+              {filteredCategories.length > 0 ? (
+                <View style={styles.categoryGrid}>
+                  {filteredCategories.map(category => (
+                    <Pressable
+                      key={category.name}
+                      style={styles.categoryCard}
+                      onPress={() => {
+                        setSelectedCategory(category.name);
+                        setSearch('');
+                      }}
+                    >
+                      <Image
+                        source={{ uri: photo(category.image) }}
+                        style={styles.categoryImage}
+                      />
+                      <View style={styles.imageOverlay} />
+                      <Text style={styles.categoryName}>
+                        {category.name}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              ) : (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyTitle}>No categories found</Text>
+                  <Text style={styles.emptyText}>
+                    Try searching for a different service.
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
+
+          <View style={styles.promoCard}>
+            <View style={styles.promoTag}>
+              <Text style={styles.promoTagText}>FOR SERVICE PROVIDERS</Text>
+            </View>
+            <Text style={styles.promoTitle}>Your talent deserves to be seen.</Text>
+            <Text style={styles.promoDescription}>
+              Grow your business and connect with new customers.
+            </Text>
+            <Pressable style={styles.promoButton}>
+              <Text style={styles.promoButtonText}>Become a provider  →</Text>
+            </Pressable>
+          </View>
         </View>
       </ScrollView>
-    </View>
+
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>
+          UP&COMER  •  LOCAL TALENT, BIG POTENTIAL
+        </Text>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8F8F2' },
-  header: { paddingTop: 58, paddingHorizontal: 22, paddingBottom: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  logo: { fontSize: 29, fontWeight: '900', color: '#202D25', letterSpacing: -1.5 },
-  logoAccent: { color: '#75A66A' },
-  tagline: { fontSize: 10, color: '#777E73', marginTop: 2 },
-  location: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', padding: 10, borderRadius: 20 },
-  locationIcon: { fontSize: 12 },
-  locationText: { fontSize: 11, fontWeight: '600', color: '#344238', marginHorizontal: 4 },
-  chevron: { color: '#667467' },
-  hero: { marginHorizontal: 18, backgroundColor: '#E8EFE2', borderRadius: 22, padding: 23, paddingTop: 28 },
-  eyebrow: { fontSize: 9, fontWeight: '800', letterSpacing: 1.5, color: '#64805D' },
-  heroTitle: { fontSize: 34, lineHeight: 40, fontWeight: '800', color: '#25342A', marginTop: 14, letterSpacing: -1.2 },
-  heroGreen: { color: '#709B65' },
-  heroDescription: { fontSize: 13, lineHeight: 20, color: '#647064', marginTop: 12, marginBottom: 22 },
-  searchBox: { backgroundColor: '#FFFFFF', borderRadius: 12, height: 49, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 13 },
-  searchIcon: { fontSize: 25, color: '#6C806B', marginRight: 8 },
-  searchInput: { flex: 1, fontSize: 12, color: '#26352B' },
-  section: { marginTop: 30 },
-  sectionHeading: { paddingHorizontal: 22, marginBottom: 15 },
-  sectionTitle: { fontSize: 20, fontWeight: '800', color: '#25342A', letterSpacing: -0.5 },
-  sectionSubtitle: { fontSize: 11, color: '#858B80', marginTop: 5, lineHeight: 16 },
-  categoryRow: { paddingHorizontal: 18, gap: 10 },
-  category: { width: 83, height: 91, backgroundColor: '#FFFFFF', borderRadius: 15, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#EDEEE7' },
-  categoryActive: { backgroundColor: '#E4EDDF', borderColor: '#8DAA83' },
-  categoryIcon: { fontSize: 25, marginBottom: 9 },
-  categoryName: { fontSize: 11, color: '#626B60', fontWeight: '600' },
-  categoryNameActive: { color: '#41623C', fontWeight: '800' },
-  providerCard: { backgroundColor: '#FFFFFF', marginHorizontal: 18, marginBottom: 11, borderRadius: 16, padding: 13, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#EFEFE8' },
-  avatar: { width: 54, height: 58, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontSize: 16, fontWeight: '800', color: '#405344' },
-  providerInfo: { flex: 1, marginLeft: 12 },
-  providerName: { fontSize: 13, fontWeight: '800', color: '#29382E' },
-  providerService: { fontSize: 10, color: '#7E857B', marginTop: 4 },
-  rating: { fontSize: 9, color: '#718A63', marginTop: 7, fontWeight: '600' },
-  priceContainer: { alignItems: 'flex-end', marginLeft: 5 },
-  price: { fontSize: 16, fontWeight: '800', color: '#304A35' },
-  priceLabel: { fontSize: 9, color: '#92988E', marginTop: 2 },
-  empty: { marginHorizontal: 22, color: '#777E73', fontSize: 13, paddingVertical: 20 },
-  callout: { margin: 18, marginTop: 24, padding: 22, backgroundColor: '#263B2E', borderRadius: 19 },
-  calloutEyebrow: { color: '#B6D0A8', fontSize: 9, fontWeight: '800', letterSpacing: 1.3 },
-  calloutTitle: { color: '#FFFFFF', fontSize: 23, fontWeight: '800', marginTop: 12 },
-  calloutText: { color: '#D2DDD1', fontSize: 12, marginTop: 7 },
-  calloutButton: { alignSelf: 'flex-start', backgroundColor: '#DDE9D5', borderRadius: 9, paddingVertical: 12, paddingHorizontal: 15, marginTop: 19 },
-  calloutButtonText: { color: '#304B34', fontSize: 11, fontWeight: '800' },
-  footer: { alignItems: 'center', paddingVertical: 25 },
-  footerLogo: { color: '#314535', fontSize: 19, fontWeight: '900' },
-  footerText: { color: '#92988E', fontSize: 10, marginTop: 5 },
+  safe: {
+    flex: 1,
+    backgroundColor: BG,
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 17,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#292730',
+  },
+  logo: {
+    fontSize: 30,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: -1.5,
+  },
+  logoPurple: {
+    color: PURPLE,
+  },
+  tagline: {
+    color: '#898592',
+    fontSize: 9,
+    marginTop: 4,
+    letterSpacing: 2,
+    fontWeight: '700',
+  },
+  profileButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 22,
+    backgroundColor: '#292531',
+    borderWidth: 1,
+    borderColor: '#514568',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileInitial: {
+    color: PURPLE,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  mainScroll: {
+    flex: 1,
+  },
+  content: {
+    paddingHorizontal: SIDE,
+    paddingTop: 27,
+    paddingBottom: 25,
+  },
+  eyebrow: {
+    color: PURPLE,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 2,
+    marginBottom: 10,
+  },
+  heading: {
+    fontSize: 36,
+    lineHeight: 41,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: -1.5,
+  },
+  headingAccent: {
+    color: PURPLE,
+  },
+  subheading: {
+    color: '#A39EAA',
+    fontSize: 13,
+    marginTop: 10,
+    marginBottom: 21,
+  },
+  searchBox: {
+    height: 53,
+    backgroundColor: CARD,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#35323D',
+    paddingHorizontal: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 26,
+  },
+  searchIcon: {
+    color: PURPLE,
+    fontSize: 27,
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    color: '#FFFFFF',
+    fontSize: 13,
+    paddingVertical: 0,
+  },
+  clearSearch: {
+    color: '#AAA5B3',
+    fontSize: 17,
+    padding: 5,
+  },
+  section: {
+    marginBottom: 26,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 17,
+  },
+  sectionTitle: {
+    fontSize: 21,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: -0.5,
+  },
+  sectionSubtitle: {
+    color: '#898592',
+    fontSize: 11,
+    marginTop: 4,
+    marginBottom: 17,
+  },
+  countLabel: {
+    color: PURPLE,
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  categoryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    columnGap: GAP,
+    rowGap: 13,
+  },
+  categoryCard: {
+    width: TILE_WIDTH,
+    height: TILE_WIDTH * 1.22,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: CARD,
+    borderWidth: 1,
+    borderColor: '#393541',
+  },
+  categoryImage: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+  },
+  imageOverlay: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'rgba(0,0,0,0.28)',
+  },
+  categoryName: {
+    position: 'absolute',
+    bottom: 10,
+    left: 8,
+    right: 5,
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 5,
+  },
+  backButton: {
+    marginTop: -8,
+    marginBottom: 17,
+  },
+  backText: {
+    color: PURPLE,
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  providerGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  providerCard: {
+    width: TILE_WIDTH,
+    marginBottom: 21,
+  },
+  providerImage: {
+    width: '100%',
+    height: TILE_WIDTH * 1.05,
+    borderRadius: 11,
+    backgroundColor: CARD,
+  },
+  providerName: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginTop: 8,
+  },
+  providerService: {
+    fontSize: 10,
+    color: '#9994A2',
+    marginTop: 4,
+  },
+  providerBottom: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  providerPrice: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  rating: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: PURPLE,
+  },
+  emptyState: {
+    backgroundColor: CARD,
+    borderRadius: 12,
+    padding: 24,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  emptyTitle: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  emptyText: {
+    color: '#9994A2',
+    fontSize: 12,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  promoCard: {
+    backgroundColor: '#211C2D',
+    borderWidth: 1,
+    borderColor: '#51416D',
+    borderRadius: 15,
+    padding: 19,
+    marginTop: 8,
+  },
+  promoTag: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#3B2C54',
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 5,
+  },
+  promoTagText: {
+    color: '#C8B4F6',
+    fontSize: 8,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  promoTitle: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '900',
+    marginTop: 13,
+  },
+  promoDescription: {
+    color: '#B7AFBF',
+    fontSize: 12,
+    lineHeight: 19,
+    marginTop: 7,
+  },
+  promoButton: {
+    backgroundColor: PURPLE,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    borderRadius: 8,
+    marginTop: 16,
+  },
+  promoButtonText: {
+    color: '#17121F',
+    fontSize: 11,
+    fontWeight: '900',
+  },
+  footer: {
+    paddingVertical: 13,
+    borderTopWidth: 1,
+    borderTopColor: '#292730',
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 8,
+    color: '#77727F',
+    letterSpacing: 1.2,
+    fontWeight: '700',
+  },
 });
