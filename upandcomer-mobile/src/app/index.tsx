@@ -29,7 +29,7 @@ const categories = [
   { name: 'Lawn Care', image: 'https://images.pexels.com/photos/9029162/pexels-photo-9029162.jpeg?auto=compress&dpr=1&h=750&w=1260' },
   { name: 'Photography', image: 'photo-1542038784456-1ea8e935640e' },
   { name: 'Cleaning', image: 'photo-1581578731548-c64695cc6952' },
-  { name: 'Junk Removal', image: 'photo-1519003722824-194d4455a60c' },
+  { name: 'Junk Removal', image: 'https://weehauljunkdc.com/_next/image?q=75&url=%2Fimages%2Fservices%2FGarage+cleanout+in+Vienna%2CVA+by+Wee+haul+team.webp&w=3840' },
   { name: 'Beauty', image: 'photo-1522335789203-aabd1fc54bc9' },
   { name: 'Handyman', image: 'photo-1581244277943-fe4a9c777189' },
   { name: 'Pet Care', image: 'photo-1450778869180-41d0601e046e' },
