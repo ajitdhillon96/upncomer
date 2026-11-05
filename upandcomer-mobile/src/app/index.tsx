@@ -174,7 +174,7 @@ export default function HomeScreen() {
           <View style={styles.businessFaqSection}>
             <Text style={styles.businessFaqHeading}>Frequently asked questions</Text>
             {[
-              { question: 'Who can join Up&comer?', answer: 'Local service providers and small businesses across a range of categories. Whether you're just starting out or already have an established business, the goal is to help customers discover your services.' },
+              { question: 'Who can join Up&comer?', answer: 'Local service providers and small businesses across a range of categories. Whether you’re just starting out or already have an established business, the goal is to help customers discover your services.' },
               { question: 'Does it cost anything to join?', answer: 'Membership and pricing details are still being worked out. We will share the details before registration opens.' },
               { question: 'How do I receive bookings?', answer: 'The platform is being designed to help customers discover businesses and request services. The booking experience is still in development.' },
               { question: 'How do payments work?', answer: 'Secure payments and provider payouts are planned features. The exact payment process and terms have not been finalized.' },
