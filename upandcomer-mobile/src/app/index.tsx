@@ -178,7 +178,7 @@ export default function HomeScreen() {
               { question: 'Does it cost anything to join?', answer: 'Membership and pricing details are still being worked out. We will share the details before registration opens.' },
               { question: 'How do I receive bookings?', answer: 'The platform is being designed to help customers discover businesses and request services. The booking experience is still in development.' },
               { question: 'How do payments work?', answer: 'Secure payments and provider payouts are planned features. The exact payment process and terms have not been finalized.' },
-              { question: 'Can I join if I'm just starting out?', answer: 'Yes. Up&comer is being built to give emerging providers a place to showcase their services and build a customer base.' },
+              { question: 'Can I join if I’m just starting out?', answer: 'Yes. Up&comer is being built to give emerging providers a place to showcase their services and build a customer base.' },
             ].map((faq, index) => (
               <View key={faq.question} style={styles.businessFaqItem}>
                 <Pressable
