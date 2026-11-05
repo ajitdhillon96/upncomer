@@ -19,14 +19,14 @@ const BG = '#101014';
 const CARD = '#1D1C23';
 
 const photo = (id: string) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=600&q=90`;
+  id.startsWith('https://') ? id : `https://images.unsplash.com/${id}?auto=format&fit=crop&w=600&q=90`;
 
 const categories = [
   { name: 'Hair', image: 'photo-1560066984-138dadb4c035' },
   { name: 'Moving', image: 'photo-1600518464441-9154a4dea21b' },
   { name: 'Auto Care', image: 'photo-1492144534655-ae79c964c9d7' },
   { name: 'Fitness', image: 'photo-1534438327276-14e5300c3a48' },
-  { name: 'Lawn Care', image: 'photo-1558618666-fcd25c85cd64' },
+  { name: 'Lawn Care', image: 'https://images.pexels.com/photos/9029162/pexels-photo-9029162.jpeg?auto=compress&dpr=1&h=750&w=1260' },
   { name: 'Photography', image: 'photo-1542038784456-1ea8e935640e' },
   { name: 'Cleaning', image: 'photo-1581578731548-c64695cc6952' },
   { name: 'Junk Removal', image: 'photo-1519003722824-194d4455a60c' },
