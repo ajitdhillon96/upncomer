@@ -1,5 +1,5 @@
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -59,6 +59,13 @@ export default function HomeScreen() {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [openBusinessFaq, setOpenBusinessFaq] = useState<number | null>(null);
+  const businessScrollRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    if (experience === 'business') {
+      requestAnimationFrame(() => businessScrollRef.current?.scrollTo({ y: 0, animated: false }));
+    }
+  }, [experience]);
 
   const query = search.trim().toLowerCase();
 
@@ -145,7 +152,7 @@ export default function HomeScreen() {
             <Text style={styles.switchButtonText}>Switch experience</Text>
           </Pressable>
         </View>
-        <ScrollView contentContainerStyle={styles.businessContent}>
+        <ScrollView ref={businessScrollRef} contentContainerStyle={styles.businessContent}>
           <Text style={styles.eyebrow}>YOUR BUSINESS STARTS HERE</Text>
           <Text style={styles.heading}>Turn your talent{ '\n' }into opportunity.</Text>
           <Text style={styles.subheading}>Build your presence, meet new customers, and grow your business with Up&comer.</Text>
