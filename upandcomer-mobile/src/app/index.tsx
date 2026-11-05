@@ -9,7 +9,6 @@ import {
   Image,
   Pressable,
   SafeAreaView,
-  useWindowDimensions,
   StatusBar,
 } from 'react-native';
 
@@ -56,9 +55,7 @@ const providers = [
 ];
 
 export default function HomeScreen() {
-  const { width } = useWindowDimensions();
-  const tileWidth = (width - SIDE * 2 - GAP * 2) / 3;
-  const [search, setSearch] = useState('');
+    const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const query = search.trim().toLowerCase();
@@ -162,11 +159,11 @@ export default function HomeScreen() {
                   {filteredProviders.map(provider => (
                     <Pressable
                       key={provider.name}
-                      style={[styles.providerCard, { width: tileWidth }]}
+                      style={styles.providerCard}
                     >
                       <Image
                         source={{ uri: photo(provider.image) }}
-                        style={[styles.providerImage, { height: tileWidth * 1.05 }]}
+                        style={styles.providerImage}
                       />
                       <Text style={styles.providerName}>{provider.name}</Text>
                       <Text style={styles.providerService}>
@@ -209,7 +206,7 @@ export default function HomeScreen() {
                   {filteredCategories.map(category => (
                     <Pressable
                       key={category.name}
-                      style={[styles.categoryCard, { width: tileWidth, height: tileWidth * 1.22 }]}
+                      style={styles.categoryCard}
                       onPress={() => {
                         setSelectedCategory(category.name);
                         setSearch('');
@@ -395,11 +392,12 @@ const styles = StyleSheet.create({
   categoryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-    columnGap: GAP,
+    justifyContent: 'space-between',
     rowGap: 13,
   },
   categoryCard: {
+    width: '31%',
+    aspectRatio: 1 / 1.22,
     borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: CARD,
@@ -442,10 +440,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   providerCard: {
+    width: '31%',
     marginBottom: 21,
   },
   providerImage: {
     width: '100%',
+    aspectRatio: 1 / 1.05,
     borderRadius: 11,
     backgroundColor: CARD,
   },
