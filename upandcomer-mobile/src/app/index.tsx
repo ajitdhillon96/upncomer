@@ -58,6 +58,7 @@ export default function HomeScreen() {
   const [experience, setExperience] = useState<'choice' | 'customer' | 'business'>('choice');
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [openBusinessFaq, setOpenBusinessFaq] = useState<number | null>(null);
 
   const query = search.trim().toLowerCase();
 
@@ -148,13 +149,53 @@ export default function HomeScreen() {
           <Text style={styles.eyebrow}>YOUR BUSINESS STARTS HERE</Text>
           <Text style={styles.heading}>Turn your talent{ '\n' }into opportunity.</Text>
           <Text style={styles.subheading}>Build your presence, meet new customers, and grow your business with Up&comer.</Text>
-          <View style={styles.businessWelcomeCard}>
-            <Text style={styles.businessCardTitle}>Welcome, future business owner.</Text>
-            <Text style={styles.businessCardText}>Your business profile and service listings will live here. We're building the tools to help you get discovered and manage your bookings.</Text>
+          <Text style={styles.businessIntroText}>Whether you're just getting started or already growing, Up&comer is designed to help local businesses get noticed and connect with more customers.</Text>
+          <View style={styles.businessBenefits}>
+            <View style={styles.businessBenefitCard}>
+              <Text style={styles.businessBenefitIcon}>◎</Text>
+              <Text style={styles.businessBenefitTitle}>Find new customers</Text>
+              <Text style={styles.businessBenefitText}>Get discovered by people looking for the services you offer.</Text>
+            </View>
+            <View style={styles.businessBenefitCard}>
+              <Text style={styles.businessBenefitIcon}>↗</Text>
+              <Text style={styles.businessBenefitTitle}>Grow your reputation</Text>
+              <Text style={styles.businessBenefitText}>Build your profile, earn customer reviews, and grow your name.</Text>
+            </View>
+            <View style={styles.businessBenefitCard}>
+              <Text style={styles.businessBenefitIcon}>▦</Text>
+              <Text style={styles.businessBenefitTitle}>Manage your work</Text>
+              <Text style={styles.businessBenefitText}>Keep customer requests, bookings, and appointments organized.</Text>
+            </View>
           </View>
           <Pressable style={styles.businessPrimaryButton} onPress={() => {}}>
-            <Text style={styles.businessPrimaryButtonText}>Business registration — coming next</Text>
+            <Text style={styles.businessPrimaryButtonText}>Get started — coming soon</Text>
           </Pressable>
+          <Text style={styles.businessComingSoonNote}>Business registration is not available in this demo yet.</Text>
+          <View style={styles.businessFaqSection}>
+            <Text style={styles.businessFaqHeading}>Frequently asked questions</Text>
+            {[
+              { question: 'Who can join Up&comer?', answer: 'Local service providers and small businesses across a range of categories. Whether you're just starting out or already have an established business, the goal is to help customers discover your services.' },
+              { question: 'Does it cost anything to join?', answer: 'Membership and pricing details are still being worked out. We will share the details before registration opens.' },
+              { question: 'How do I receive bookings?', answer: 'The platform is being designed to help customers discover businesses and request services. The booking experience is still in development.' },
+              { question: 'How do payments work?', answer: 'Secure payments and provider payouts are planned features. The exact payment process and terms have not been finalized.' },
+              { question: 'Can I join if I'm just starting out?', answer: 'Yes. Up&comer is being built to give emerging providers a place to showcase their services and build a customer base.' },
+            ].map((faq, index) => (
+              <View key={faq.question} style={styles.businessFaqItem}>
+                <Pressable
+                  style={styles.businessFaqQuestion}
+                  onPress={() => setOpenBusinessFaq(openBusinessFaq === index ? null : index)}
+                  accessibilityRole="button"
+                  accessibilityState={{ expanded: openBusinessFaq === index }}
+                >
+                  <Text style={styles.businessFaqQuestionText}>{faq.question}</Text>
+                  <Text style={styles.businessFaqToggle}>{openBusinessFaq === index ? '−' : '+'}</Text>
+                </Pressable>
+                {openBusinessFaq === index && (
+                  <Text style={styles.businessFaqAnswer}>{faq.answer}</Text>
+                )}
+              </View>
+            ))}
+          </View>
           <Pressable style={styles.backToChoice} onPress={() => setExperience('choice')}>
             <Text style={styles.backToChoiceText}>‹  Back to account type</Text>
           </Pressable>
@@ -447,6 +488,91 @@ const styles = StyleSheet.create({
     paddingHorizontal: SIDE,
     paddingTop: 32,
     paddingBottom: 40,
+  },
+  businessIntroText: {
+    color: '#A39EAA',
+    fontSize: 13,
+    lineHeight: 21,
+    marginTop: 2,
+  },
+  businessBenefits: {
+    marginTop: 20,
+    gap: 11,
+  },
+  businessBenefitCard: {
+    backgroundColor: CARD,
+    borderWidth: 1,
+    borderColor: '#393541',
+    borderRadius: 13,
+    padding: 16,
+  },
+  businessBenefitIcon: {
+    color: PURPLE,
+    fontSize: 23,
+    fontWeight: '800',
+    marginBottom: 8,
+  },
+  businessBenefitTitle: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  businessBenefitText: {
+    color: '#AAA5B3',
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 5,
+  },
+  businessComingSoonNote: {
+    color: '#85818E',
+    fontSize: 10,
+    textAlign: 'center',
+    marginTop: 9,
+  },
+  businessFaqSection: {
+    marginTop: 31,
+  },
+  businessFaqHeading: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+    marginBottom: 13,
+  },
+  businessFaqItem: {
+    backgroundColor: CARD,
+    borderWidth: 1,
+    borderColor: '#393541',
+    borderRadius: 11,
+    marginBottom: 9,
+    overflow: 'hidden',
+  },
+  businessFaqQuestion: {
+    minHeight: 54,
+    paddingHorizontal: 15,
+    paddingVertical: 13,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  businessFaqQuestionText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+    flex: 1,
+    paddingRight: 12,
+  },
+  businessFaqToggle: {
+    color: PURPLE,
+    fontSize: 22,
+    fontWeight: '500',
+  },
+  businessFaqAnswer: {
+    color: '#AAA5B3',
+    fontSize: 12,
+    lineHeight: 19,
+    paddingHorizontal: 15,
+    paddingBottom: 15,
   },
   businessWelcomeCard: {
     backgroundColor: CARD,
