@@ -9,14 +9,12 @@ import {
   Image,
   Pressable,
   SafeAreaView,
-  Dimensions,
+  useWindowDimensions,
   StatusBar,
 } from 'react-native';
 
-const { width } = Dimensions.get('window');
 const SIDE = 18;
 const GAP = 10;
-const TILE_WIDTH = (width - SIDE * 2 - GAP * 2) / 3;
 const PURPLE = '#A78BFA';
 const BG = '#101014';
 const CARD = '#1D1C23';
@@ -58,6 +56,8 @@ const providers = [
 ];
 
 export default function HomeScreen() {
+  const { width } = useWindowDimensions();
+  const tileWidth = (width - SIDE * 2 - GAP * 2) / 3;
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
@@ -162,11 +162,11 @@ export default function HomeScreen() {
                   {filteredProviders.map(provider => (
                     <Pressable
                       key={provider.name}
-                      style={styles.providerCard}
+                      style={[styles.providerCard, { width: tileWidth }]}
                     >
                       <Image
                         source={{ uri: photo(provider.image) }}
-                        style={styles.providerImage}
+                        style={[styles.providerImage, { height: tileWidth * 1.05 }]}
                       />
                       <Text style={styles.providerName}>{provider.name}</Text>
                       <Text style={styles.providerService}>
@@ -209,7 +209,7 @@ export default function HomeScreen() {
                   {filteredCategories.map(category => (
                     <Pressable
                       key={category.name}
-                      style={styles.categoryCard}
+                      style={[styles.categoryCard, { width: tileWidth, height: tileWidth * 1.22 }]}
                       onPress={() => {
                         setSelectedCategory(category.name);
                         setSearch('');
@@ -400,8 +400,6 @@ const styles = StyleSheet.create({
     rowGap: 13,
   },
   categoryCard: {
-    width: TILE_WIDTH,
-    height: TILE_WIDTH * 1.22,
     borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: CARD,
@@ -444,12 +442,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   providerCard: {
-    width: TILE_WIDTH,
     marginBottom: 21,
   },
   providerImage: {
     width: '100%',
-    height: TILE_WIDTH * 1.05,
     borderRadius: 11,
     backgroundColor: CARD,
   },
