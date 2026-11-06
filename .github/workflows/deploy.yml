@@ -26,20 +26,18 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: upandcomer-mobile/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        working-directory: upandcomer-mobile
         run: npm ci
 
       - name: Build website
-        working-directory: upandcomer-mobile
-        run: npx expo export --platform web
+        run: npm run build
 
       - name: Upload website
         uses: actions/upload-pages-artifact@v3
         with:
-          path: upandcomer-mobile/dist
+          path: out
 
   deploy:
     environment:
@@ -52,4 +50,4 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v5.0.1
         with:
-          timeout: 1200000
+          timeout: 600000
