@@ -1,214 +1,85 @@
 "use client";
-
 import { useMemo, useState } from "react";
 
-type Provider = {
-  name: string; service: string; description: string; price: string;
-  rating: string; emoji: string; location: string; color: string;
-  bio: string; distance: string; days: string[];
-};
-
-const categories = [
-  { name: "Lawn Care", icon: "🌱" },
-  { name: "Moving", icon: "📦" },
-  { name: "Hair", icon: "✂️" },
-  { name: "Car Detailing", icon: "🚗" },
-  { name: "Personal Training", icon: "💪" },
+type Provider = { name:string; service:string; description:string; price:string; rating:string; emoji:string; location:string; color:string; bio:string; distance:string; days:string[] };
+type Booking = { id:number; provider:string; service:string; date:string; time:string; price:string; status:"Requested"|"Confirmed"|"Completed"|"Cancelled" };
+type Review = { id:number; provider:string; author:string; rating:number; comment:string; date:string };
+const categories = [{name:"Lawn Care",icon:"🌱"},{name:"Moving",icon:"📦"},{name:"Hair",icon:"✂️"},{name:"Car Detailing",icon:"🚗"},{name:"Personal Training",icon:"💪"}];
+const providers:Provider[] = [
+{name:"Marcus Green",service:"Lawn Care",description:"Lawn care & garden maintenance",price:"$35",rating:"4.9",emoji:"🌿",location:"Los Angeles, CA",color:"bg-green-100",bio:"Detail-oriented lawn care and garden maintenance. Building a local business one great yard at a time.",distance:"2.4 miles away",days:["Mon","Tue","Wed","Fri","Sat"]},
+{name:"Sofia Martinez",service:"Hair",description:"Modern cuts & styling",price:"$45",rating:"5.0",emoji:"💇‍♀️",location:"Los Angeles, CA",color:"bg-pink-100",bio:"Specializing in modern cuts, styling, and helping clients feel their best.",distance:"4.1 miles away",days:["Tue","Wed","Thu","Fri","Sat"]},
+{name:"Jordan Blake",service:"Personal Training",description:"Personal fitness coaching",price:"$30",rating:"4.9",emoji:"🏋️",location:"Los Angeles, CA",color:"bg-orange-100",bio:"Supportive one-on-one fitness coaching for all experience levels.",distance:"6.8 miles away",days:["Mon","Wed","Thu","Sat","Sun"]},
+{name:"Alex Rivera",service:"Car Detailing",description:"Mobile auto detailing",price:"$50",rating:"4.8",emoji:"🚘",location:"Los Angeles, CA",color:"bg-blue-100",bio:"Mobile detailing that brings a clean, polished finish right to your driveway.",distance:"8.2 miles away",days:["Mon","Tue","Thu","Fri","Sat"]},
+{name:"Chris Taylor",service:"Moving",description:"Local moving & heavy lifting",price:"$40",rating:"4.9",emoji:"🚚",location:"Los Angeles, CA",color:"bg-yellow-100",bio:"Reliable help with local moves, loading, unloading, and heavy lifting.",distance:"9.5 miles away",days:["Tue","Wed","Fri","Sat","Sun"]}
 ];
+const slots=["9:00 AM","10:30 AM","12:00 PM","1:30 PM","3:00 PM","4:30 PM"];
+const weekdays=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+function dateOffset(n:number){const d=new Date();d.setDate(d.getDate()+n);return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
+function today(){return dateOffset(0)}
+function prettyDate(v:string){return v?new Date(v+"T12:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}):""}
 
-const providers: Provider[] = [
-  { name: "Marcus Green", service: "Lawn Care", description: "Lawn care & garden maintenance", price: "$35", rating: "4.9", emoji: "🌿", location: "Los Angeles, CA", color: "bg-green-100", bio: "Detail-oriented lawn care and garden maintenance. Building a local business one great yard at a time.", distance: "2.4 miles away", days: ["Mon", "Tue", "Wed", "Fri", "Sat"] },
-  { name: "Sofia Martinez", service: "Hair", description: "Modern cuts & styling", price: "$45", rating: "5.0", emoji: "💇‍♀️", location: "Los Angeles, CA", color: "bg-pink-100", bio: "Specializing in modern cuts, styling, and helping clients feel their best.", distance: "4.1 miles away", days: ["Tue", "Wed", "Thu", "Fri", "Sat"] },
-  { name: "Jordan Blake", service: "Personal Training", description: "Personal fitness coaching", price: "$30", rating: "4.9", emoji: "🏋️", location: "Los Angeles, CA", color: "bg-orange-100", bio: "Supportive one-on-one fitness coaching for all experience levels.", distance: "6.8 miles away", days: ["Mon", "Wed", "Thu", "Sat", "Sun"] },
-  { name: "Alex Rivera", service: "Car Detailing", description: "Mobile auto detailing", price: "$50", rating: "4.8", emoji: "🚘", location: "Los Angeles, CA", color: "bg-blue-100", bio: "Mobile detailing that brings a clean, polished finish right to your driveway.", distance: "8.2 miles away", days: ["Mon", "Tue", "Thu", "Fri", "Sat"] },
-  { name: "Chris Taylor", service: "Moving", description: "Local moving & heavy lifting", price: "$40", rating: "4.9", emoji: "🚚", location: "Los Angeles, CA", color: "bg-yellow-100", bio: "Reliable help with local moves, loading, unloading, and heavy lifting.", distance: "9.5 miles away", days: ["Tue", "Wed", "Fri", "Sat", "Sun"] },
-];
+export default function Home(){
+const [search,setSearch]=useState(""); const [selected,setSelected]=useState("All");
+const [location,setLocation]=useState("Los Angeles, CA"); const [zip,setZip]=useState(""); const [locationMessage,setLocationMessage]=useState("");
+const [activeProvider,setActiveProvider]=useState<Provider|null>(null); const [bookingDate,setBookingDate]=useState(dateOffset(1)); const [bookingTime,setBookingTime]=useState(""); const [bookingConfirmed,setBookingConfirmed]=useState(false);
+const [joinOpen,setJoinOpen]=useState(false); const [signupType,setSignupType]=useState<"customer"|"business"|null>(null); const [signupDone,setSignupDone]=useState(false);
+const [dashboard,setDashboard]=useState<"customer"|"provider"|null>(null);
+const [bookings,setBookings]=useState<Booking[]>([
+{id:1,provider:"Sofia Martinez",service:"Hair",date:dateOffset(-8),time:"10:30 AM",price:"$45",status:"Completed"},
+{id:2,provider:"Marcus Green",service:"Lawn Care",date:dateOffset(3),time:"9:00 AM",price:"$35",status:"Confirmed"}
+]);
+const [reviews,setReviews]=useState<Review[]>([
+{id:1,provider:"Sofia Martinez",author:"Taylor R.",rating:5,comment:"Great experience and a beautiful result. Would book again!",date:dateOffset(-7)},
+{id:2,provider:"Marcus Green",author:"Jamie L.",rating:5,comment:"Friendly, on time, and did a fantastic job.",date:dateOffset(-12)}
+]);
+const [workingDays,setWorkingDays]=useState(["Mon","Tue","Wed","Thu","Fri","Sat"]); const [startTime,setStartTime]=useState("9:00 AM"); const [endTime,setEndTime]=useState("5:00 PM"); const [availabilitySaved,setAvailabilitySaved]=useState(false);
+const [verification,setVerification]=useState("Consent received"); const [message,setMessage]=useState("");
+const [reviewTarget,setReviewTarget]=useState<Booking|null>(null); const [reviewRating,setReviewRating]=useState(5); const [reviewComment,setReviewComment]=useState("");
+const [rescheduleTarget,setRescheduleTarget]=useState<number|null>(null); const [rescheduleDate,setRescheduleDate]=useState(dateOffset(2)); const [rescheduleTime,setRescheduleTime]=useState("10:30 AM");
+const filtered=useMemo(()=>providers.filter(p=>[p.name,p.service,p.description].some(v=>v.toLowerCase().includes(search.toLowerCase()))&&(selected==="All"||p.service===selected)),[search,selected]);
+function locate(){setLocationMessage("");if(!navigator.geolocation){setLocationMessage("Location is unavailable. Enter a ZIP code instead.");return}navigator.geolocation.getCurrentPosition(({coords})=>setLocation("Your location ("+coords.latitude.toFixed(2)+", "+coords.longitude.toFixed(2)+")"),()=>setLocationMessage("Location permission was not granted. Enter a ZIP code instead."),{timeout:8000})}
+function applyZip(){if(!/^\d{5}$/.test(zip.trim())){setLocationMessage("Enter a valid 5-digit ZIP code.");return}setLocation("ZIP "+zip.trim());setLocationMessage("Location updated for this demo.")}
+function openProvider(p:Provider){setActiveProvider(p);setBookingDate(dateOffset(1));setBookingTime("");setBookingConfirmed(false)}
+function openSignup(t:"customer"|"business"){setSignupType(t);setSignupDone(false);setJoinOpen(false)}
+function submitBooking(){if(!activeProvider||!bookingDate||!bookingTime)return;setBookings(old=>[...old,{id:Date.now(),provider:activeProvider.name,service:activeProvider.service,date:bookingDate,time:bookingTime,price:activeProvider.price,status:"Requested"}]);setBookingConfirmed(true)}
+function cancelBooking(id:number){setBookings(old=>old.map(b=>b.id===id?{...b,status:"Cancelled"}:b));setMessage("Booking cancelled in this demo.")}
+function saveReschedule(){if(rescheduleTarget===null)return;setBookings(old=>old.map(b=>b.id===rescheduleTarget?{...b,date:rescheduleDate,time:rescheduleTime,status:"Requested"}:b));setRescheduleTarget(null);setMessage("Reschedule request saved in this demo.")}
+function submitReview(){if(!reviewTarget||!reviewComment.trim())return;setReviews(old=>[...old,{id:Date.now(),provider:reviewTarget.provider,author:"You",rating:reviewRating,comment:reviewComment.trim(),date:today()}]);setReviewTarget(null);setReviewComment("");setReviewRating(5);setMessage("Thanks! Your demo review has been posted.")}
+return <main className="min-h-screen bg-[#faf9f5] text-[#243c2d]">
+<nav className="flex items-center justify-between border-b border-[#e8e9df] bg-white px-6 py-5 md:px-16">
+<a href="#" className="text-2xl font-black tracking-tight text-[#245b3b]">Up&<span className="text-[#e5a64c]">comer</span></a>
+<div className="hidden items-center gap-8 text-sm font-medium md:flex"><a href="#discover">Discover</a><a href="#categories">Categories</a><a href="#providers">Find a Pro</a></div>
+<div className="flex items-center gap-2"><button onClick={()=>{setDashboard("customer");setMessage("")}} className="hidden rounded-full px-3 py-2 text-sm font-semibold text-[#245b3b] hover:bg-[#edf4ec] sm:block">My bookings</button><button onClick={()=>setJoinOpen(true)} className="rounded-full border border-[#245b3b] px-5 py-2 text-sm font-semibold text-[#245b3b] hover:bg-[#245b3b] hover:text-white">Join Up&comer</button></div>
+</nav>
+<section id="discover" className="px-6 py-16 md:px-16 md:py-24"><div className="mx-auto max-w-6xl">
+<div className="max-w-3xl"><p className="mb-5 text-sm font-bold uppercase tracking-[0.2em] text-[#b47b32]">Discover emerging local talent</p><h1 className="text-5xl font-black leading-tight tracking-tight md:text-7xl">Discover your next<span className="block text-[#39764c]">favorite local pro.</span></h1><p className="mt-6 max-w-xl text-lg leading-8 text-[#68776b]">Find talented up-and-comers offering quality services at prices that make sense. Support local talent while they're on the rise.</p></div>
+<div className="mt-10 flex max-w-3xl flex-col gap-3 rounded-2xl bg-white p-3 shadow-lg shadow-green-950/5 sm:flex-row"><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="What service are you looking for?" className="min-w-0 flex-1 rounded-xl bg-[#f5f6f1] px-5 py-4 text-sm outline-none focus:ring-2 focus:ring-green-700"/><a href="#providers" className="rounded-xl bg-[#245b3b] px-8 py-4 text-center font-bold text-white">Find a pro →</a></div>
+<div className="mt-5 max-w-3xl rounded-2xl border border-[#e8e9df] bg-white p-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-wider text-[#b47b32]">Your search area</p><p className="mt-1 font-semibold">📍 {location}</p></div><button onClick={locate} className="rounded-full border border-[#245b3b] px-4 py-2 text-sm font-semibold text-[#245b3b]">Use my location</button></div><div className="mt-3 flex flex-col gap-2 sm:flex-row"><input value={zip} onChange={e=>setZip(e.target.value)} inputMode="numeric" maxLength={5} placeholder="Enter ZIP code" className="w-full rounded-xl bg-[#f5f6f1] px-4 py-3 text-sm sm:max-w-xs"/><button onClick={applyZip} className="rounded-xl bg-[#245b3b] px-5 py-3 text-sm font-bold text-white">Update location</button></div>{locationMessage&&<p className="mt-2 text-xs text-[#8a6330]">{locationMessage}</p>}<p className="mt-2 text-xs text-[#849087]">Demo location only. Provider distances are sample data.</p></div>
+<p className="mt-4 text-sm text-[#849087]">Great services. Fair prices. The next generation of local talent.</p></div></section>
+<section id="categories" className="border-y border-[#e8e9df] bg-white px-6 py-14 md:px-16"><div className="mx-auto max-w-6xl"><div className="mb-8 flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm font-bold uppercase tracking-widest text-[#b47b32]">Explore</p><h2 className="mt-2 text-3xl font-extrabold">What do you need done?</h2></div><button onClick={()=>setSelected("All")} className="text-sm font-semibold text-[#39764c]">View all services →</button></div><div className="grid grid-cols-2 gap-4 md:grid-cols-5">{categories.map(c=><button key={c.name} onClick={()=>{setSelected(c.name);document.getElementById("providers")?.scrollIntoView({behavior:"smooth"})}} className={"rounded-2xl border p-6 text-left transition hover:-translate-y-1 hover:shadow-md "+(selected===c.name?"border-[#39764c] bg-[#edf4ec]":"border-[#e8e9df] bg-[#faf9f5]")}><span className="text-3xl">{c.icon}</span><p className="mt-4 font-bold">{c.name}</p><p className="mt-1 text-xs text-[#849087]">Explore pros →</p></button>)}</div></div></section>
+<section id="providers" className="px-6 py-16 md:px-16"><div className="mx-auto max-w-6xl"><p className="text-sm font-bold uppercase tracking-widest text-[#b47b32]">Meet the talent</p><div className="mt-2 flex flex-wrap items-center justify-between gap-4"><h2 className="text-3xl font-extrabold">Local pros on the rise.</h2><button onClick={()=>setSelected("All")} className="text-sm font-semibold text-[#39764c]">Clear filters</button></div><p className="mt-3 text-[#68776b]">Discover skilled providers building their businesses and reputation.</p><div className="mt-8 flex flex-wrap gap-2">{["All",...categories.map(c=>c.name)].map(n=><button key={n} onClick={()=>setSelected(n)} className={"rounded-full px-4 py-2 text-sm font-semibold "+(selected===n?"bg-[#245b3b] text-white":"border border-[#dfe4dc] bg-white text-[#536458]")}>{n}</button>)}</div>
+<div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{filtered.map(p=>{const rs=reviews.filter(r=>r.provider===p.name);const avg=rs.length?(rs.reduce((s,r)=>s+r.rating,0)/rs.length).toFixed(1):p.rating;return <article key={p.name} className="overflow-hidden rounded-2xl border border-[#e8e9df] bg-white transition hover:-translate-y-1 hover:shadow-lg"><div className={"flex h-40 items-center justify-center "+p.color}><span className="text-7xl">{p.emoji}</span></div><div className="p-6"><div className="flex items-center justify-between"><span className="rounded-full bg-[#edf4ec] px-3 py-1 text-xs font-bold text-[#39764c]">Emerging provider</span><span className="text-sm font-bold">★ {avg} <span className="font-normal text-[#849087]">({rs.length})</span></span></div><h3 className="mt-4 text-xl font-extrabold">{p.name}</h3><p className="mt-1 text-sm text-[#68776b]">{p.description}</p><p className="mt-3 text-xs text-[#849087]">📍 {p.location} · {p.distance}</p><div className="mt-5 flex items-center justify-between border-t border-[#edf0e9] pt-4"><p className="text-sm text-[#68776b]">From <span className="text-lg font-extrabold text-[#245b3b]">{p.price}</span></p><button onClick={()=>openProvider(p)} className="rounded-full bg-[#245b3b] px-5 py-2.5 text-sm font-bold text-white">View profile →</button></div></div></article>})}</div>{filtered.length===0&&<p className="mt-10 rounded-xl bg-white p-8 text-center text-[#68776b]">No providers found. Try another search or category.</p>}</div></section>
+<section className="bg-[#245b3b] px-6 py-16 text-center text-white md:px-16"><h2 className="text-3xl font-extrabold">Good at what you do?</h2><p className="mx-auto mt-4 max-w-xl leading-7 text-green-100">Build your reputation, find new customers, and grow your business with Up&comer.</p><div className="mt-7 flex flex-wrap justify-center gap-3"><button onClick={()=>openSignup("business")} className="rounded-full bg-[#f0bd70] px-7 py-3 font-bold text-[#243c2d]">Become a provider</button><button onClick={()=>{setDashboard("provider");setMessage("")}} className="rounded-full border border-white/60 px-7 py-3 font-bold text-white">Provider dashboard demo</button></div></section>
+<footer className="bg-[#193f2a] px-6 py-8 text-center text-sm text-green-100">© 2026 Up&comer. Discover talent on the rise.</footer>
 
-const slots = ["9:00 AM", "10:30 AM", "12:00 PM", "1:30 PM", "3:00 PM", "4:30 PM"];
+{joinOpen&&<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={()=>setJoinOpen(false)}><div className="w-full max-w-md rounded-3xl bg-white p-7 shadow-2xl" onClick={e=>e.stopPropagation()}><div className="flex items-start justify-between"><div><p className="text-xs font-bold uppercase tracking-widest text-[#b47b32]">Join the community</p><h2 className="mt-2 text-2xl font-extrabold">How will you use Up&comer?</h2></div><button onClick={()=>setJoinOpen(false)} className="text-2xl text-gray-400">×</button></div><div className="mt-6 grid gap-3"><button onClick={()=>openSignup("customer")} className="rounded-2xl border border-[#dfe4dc] p-5 text-left hover:bg-[#f3f7f1]"><span className="text-2xl">🛍️</span><p className="mt-2 font-bold">I'm a customer</p><p className="text-sm text-[#68776b]">Discover and book local services.</p></button><button onClick={()=>openSignup("business")} className="rounded-2xl border border-[#dfe4dc] p-5 text-left hover:bg-[#f3f7f1]"><span className="text-2xl">🚀</span><p className="mt-2 font-bold">I'm a service provider</p><p className="text-sm text-[#68776b]">List my business and find customers.</p></button><button onClick={()=>{setJoinOpen(false);setDashboard("customer")}} className="rounded-2xl border p-4 text-left font-bold">Open customer dashboard demo →</button></div></div></div>}
 
-function todayString() {
-  const d = new Date();
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-}
+{signupType&&<div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4" onClick={()=>setSignupType(null)}><div className="my-8 w-full max-w-xl rounded-3xl bg-white p-7 shadow-2xl" onClick={e=>e.stopPropagation()}><div className="flex items-start justify-between"><div><p className="text-xs font-bold uppercase tracking-widest text-[#b47b32]">{signupType==="customer"?"Customer registration":"Provider registration"}</p><h2 className="mt-2 text-2xl font-extrabold">{signupDone?"You're on the list!":signupType==="customer"?"Create your customer profile":"Create your business profile"}</h2></div><button onClick={()=>setSignupType(null)} className="text-2xl text-gray-400">×</button></div>{signupDone?<div className="py-8"><div className="text-5xl">🎉</div><p className="mt-4 text-[#536458]">Demo profile submitted. No account was created and no information was sent to a server.</p><button onClick={()=>setSignupType(null)} className="mt-6 rounded-full bg-[#245b3b] px-6 py-3 font-bold text-white">Back to Up&comer</button></div>:<form className="mt-6 grid gap-4 sm:grid-cols-2" onSubmit={e=>{e.preventDefault();setSignupDone(true)}}><label className="text-sm font-semibold">First name<input required placeholder="First name" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal"/></label><label className="text-sm font-semibold">Last name<input required placeholder="Last name" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal"/></label><label className="text-sm font-semibold">Email<input required type="email" placeholder="you@example.com" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal"/></label><label className="text-sm font-semibold">Phone<input required type="tel" placeholder="(555) 555-5555" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal"/></label>{signupType==="business"&&<><label className="text-sm font-semibold sm:col-span-2">Business name<input required placeholder="Your business name" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal"/></label><label className="text-sm font-semibold">Business category<select required defaultValue="" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal"><option value="" disabled>Select a category</option>{categories.map(c=><option key={c.name}>{c.name}</option>)}<option>Other</option></select></label><label className="text-sm font-semibold">Years in business<select defaultValue="Just starting" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal"><option>Just starting</option><option>Less than 1 year</option><option>1–3 years</option><option>3+ years</option></select></label></>}<label className="text-sm font-semibold sm:col-span-2">Street address<input required placeholder="Street address" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal"/></label><label className="text-sm font-semibold">City<input required placeholder="City" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal"/></label><label className="text-sm font-semibold">State<input required placeholder="State" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal"/></label><label className="text-sm font-semibold">ZIP code<input required pattern="[0-9]{5}" maxLength={5} placeholder="ZIP code" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal"/></label>{signupType==="business"&&<label className="flex items-start gap-3 rounded-xl bg-[#f5f6f1] p-4 text-sm sm:col-span-2"><input required type="checkbox" className="mt-1 accent-[#245b3b]"/><span>I consent to a background check, subject to applicable disclosures and authorization.<span className="block text-xs text-[#849087]">Demo only. No background check is initiated.</span></span></label>}<p className="text-xs text-[#849087] sm:col-span-2">Demo only. Do not enter sensitive personal information. Details are not saved or transmitted.</p><button type="submit" className="rounded-full bg-[#245b3b] px-6 py-3 font-bold text-white sm:col-span-2">Submit demo registration</button></form>}</div></div>}
 
-export default function Home() {
-  const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState("All");
-  const [location, setLocation] = useState("Los Angeles, CA");
-  const [zip, setZip] = useState("");
-  const [locationMessage, setLocationMessage] = useState("");
-  const [activeProvider, setActiveProvider] = useState<Provider | null>(null);
-  const [bookingDate, setBookingDate] = useState(todayString());
-  const [bookingTime, setBookingTime] = useState("");
-  const [bookingConfirmed, setBookingConfirmed] = useState(false);
-  const [joinOpen, setJoinOpen] = useState(false);
-  const [signupType, setSignupType] = useState<"customer" | "business" | null>(null);
-  const [signupDone, setSignupDone] = useState(false);
+{activeProvider&&<div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4" onClick={()=>setActiveProvider(null)}><div className="my-8 w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl md:p-8" onClick={e=>e.stopPropagation()}><div className="flex items-start justify-between"><div><p className="text-xs font-bold uppercase tracking-widest text-[#b47b32]">Emerging local provider</p><h2 className="mt-2 text-2xl font-extrabold">{activeProvider.name}</h2><p className="mt-1 text-sm text-[#68776b]">{activeProvider.service} · ★ {activeProvider.rating} · {activeProvider.location}</p></div><button onClick={()=>setActiveProvider(null)} className="text-2xl text-gray-400">×</button></div><div className={"mt-5 flex h-28 items-center justify-center rounded-2xl "+activeProvider.color}><span className="text-6xl">{activeProvider.emoji}</span></div><p className="mt-4 leading-7 text-[#536458]">{activeProvider.bio}</p><div className="mt-4 rounded-2xl bg-[#f7f8f3] p-4"><h3 className="font-bold">Customer reviews</h3>{reviews.filter(r=>r.provider===activeProvider.name).map(r=><div key={r.id} className="mt-3 border-t border-[#e5e9df] pt-3"><div className="flex justify-between text-sm font-semibold"><span>{r.author}</span><span>{"★".repeat(r.rating)}</span></div><p className="mt-1 text-sm text-[#68776b]">{r.comment}</p></div>)}{reviews.filter(r=>r.provider===activeProvider.name).length===0&&<p className="mt-2 text-sm text-[#849087]">Be the first to leave a review.</p>}</div><div className="mt-5 rounded-2xl border border-[#e8e9df] p-5">{bookingConfirmed?<div className="py-5 text-center"><div className="text-4xl">✅</div><h3 className="mt-3 text-xl font-extrabold">Booking request saved!</h3><p className="mt-2 text-sm text-[#68776b]">Demo booking with {activeProvider.name} for {prettyDate(bookingDate)} at {bookingTime}.</p><button onClick={()=>{setActiveProvider(null);setDashboard("customer")}} className="mt-5 rounded-full bg-[#245b3b] px-6 py-3 font-bold text-white">View my bookings</button></div>:<><div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-lg font-extrabold">Book an appointment</h3><p className="font-bold text-[#245b3b]">From {activeProvider.price}</p></div><label className="mt-4 block text-sm font-semibold">Choose a date<input type="date" min={today()} value={bookingDate} onChange={e=>{setBookingDate(e.target.value);setBookingTime("")}} className="mt-2 w-full rounded-xl border border-[#dfe4dc] bg-[#faf9f5] p-3"/></label><p className="mt-4 text-sm font-semibold">Available times</p><div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">{slots.map(slot=>{const busy=bookings.some(b=>b.provider===activeProvider.name&&b.date===bookingDate&&b.time===slot&&b.status!=="Cancelled");const off=!activeProvider.days.includes(new Date(bookingDate+"T12:00:00").toLocaleDateString("en-US",{weekday:"short"}));return <button key={slot} disabled={busy||off} onClick={()=>setBookingTime(slot)} className={"rounded-xl border px-3 py-3 text-sm font-semibold "+(busy||off?"cursor-not-allowed border-gray-100 bg-gray-100 text-gray-400":bookingTime===slot?"border-[#245b3b] bg-[#245b3b] text-white":"border-[#dfe4dc] hover:border-[#39764c] hover:bg-[#edf4ec]")}>{slot}{busy?" · Booked":off?" · Unavailable":""}</button>})}</div><p className="mt-3 text-xs text-[#849087]">Sample availability only. Not connected to a live provider calendar.</p><button disabled={!bookingDate||!bookingTime} onClick={submitBooking} className="mt-5 w-full rounded-full bg-[#245b3b] px-6 py-3 font-bold text-white disabled:opacity-40">Request booking</button></>}</div></div></div>}
 
-  const filtered = useMemo(() => providers.filter((provider) => {
-    const matchesSearch = [provider.name, provider.service, provider.description].some((v) => v.toLowerCase().includes(search.toLowerCase()));
-    return matchesSearch && (selected === "All" || provider.service === selected);
-  }), [search, selected]);
+{dashboard&&<div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/50 p-3 sm:p-6" onClick={()=>setDashboard(null)}><div className="my-4 w-full max-w-4xl rounded-3xl bg-[#faf9f5] p-5 shadow-2xl sm:p-8" onClick={e=>e.stopPropagation()}><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-widest text-[#b47b32]">Up&comer demo portal</p><h2 className="mt-1 text-2xl font-extrabold">{dashboard==="customer"?"Customer dashboard":"Provider dashboard"}</h2><p className="mt-1 text-sm text-[#68776b]">Sample data only. Changes reset when the page is refreshed.</p></div><button onClick={()=>setDashboard(null)} className="rounded-full border bg-white px-4 py-2 text-sm font-semibold">Close ✕</button></div>
+<div className="mt-5 flex gap-2"><button onClick={()=>{setDashboard("customer");setMessage("")}} className={"rounded-full px-4 py-2 text-sm font-semibold "+(dashboard==="customer"?"bg-[#245b3b] text-white":"border bg-white text-[#536458]")}>Customer view</button><button onClick={()=>{setDashboard("provider");setMessage("")}} className={"rounded-full px-4 py-2 text-sm font-semibold "+(dashboard==="provider"?"bg-[#245b3b] text-white":"border bg-white text-[#536458]")}>Provider view</button></div>
+{message&&<p className="mt-4 rounded-xl bg-[#edf4ec] p-3 text-sm text-[#245b3b]">{message}</p>}
+{dashboard==="customer"?<div className="mt-6 grid gap-6 md:grid-cols-[1.2fr_.8fr]"><section className="rounded-2xl border border-[#e8e9df] bg-white p-5"><div className="flex items-center justify-between"><h3 className="text-lg font-extrabold">My bookings</h3><span className="text-xs text-[#849087]">{bookings.length} total</span></div><div className="mt-4 space-y-3">{bookings.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(b=><article key={b.id} className="rounded-xl border border-[#edf0e9] p-4"><div className="flex flex-wrap items-start justify-between gap-2"><div><p className="font-bold">{b.service} with {b.provider}</p><p className="mt-1 text-sm text-[#68776b]">{prettyDate(b.date)} · {b.time} · {b.price}</p></div><span className="rounded-full bg-[#f5f6f1] px-3 py-1 text-xs font-bold">{b.status}</span></div><div className="mt-3 flex flex-wrap gap-2">{b.status==="Completed"&&!reviews.some(r=>r.provider===b.provider&&r.author==="You")&&<button onClick={()=>setReviewTarget(b)} className="rounded-full border border-[#245b3b] px-3 py-2 text-xs font-bold text-[#245b3b]">Leave a review</button>}{(b.status==="Requested"||b.status==="Confirmed")&&<><button onClick={()=>{setRescheduleTarget(b.id);setRescheduleDate(dateOffset(2));setRescheduleTime("10:30 AM")}} className="rounded-full border px-3 py-2 text-xs font-bold">Reschedule</button><button onClick={()=>cancelBooking(b.id)} className="rounded-full border border-red-200 px-3 py-2 text-xs font-bold text-red-700">Cancel booking</button></>}</div>{rescheduleTarget===b.id&&<div className="mt-3 grid gap-2 rounded-xl bg-[#f7f8f3] p-3 sm:grid-cols-3"><label className="text-xs font-semibold">New date<input type="date" min={today()} value={rescheduleDate} onChange={e=>setRescheduleDate(e.target.value)} className="mt-1 w-full rounded-lg border bg-white p-2"/></label><label className="text-xs font-semibold">New time<select value={rescheduleTime} onChange={e=>setRescheduleTime(e.target.value)} className="mt-1 w-full rounded-lg border bg-white p-2">{slots.map(s=><option key={s}>{s}</option>)}</select></label><div className="flex items-end gap-2"><button onClick={saveReschedule} className="rounded-lg bg-[#245b3b] px-3 py-2 text-xs font-bold text-white">Save</button><button onClick={()=>setRescheduleTarget(null)} className="rounded-lg border px-3 py-2 text-xs">Keep</button></div></div>}</article>)}</div></section><section className="rounded-2xl border border-[#e8e9df] bg-white p-5"><h3 className="text-lg font-extrabold">Your activity</h3><div className="mt-4 grid grid-cols-2 gap-3"><div className="rounded-xl bg-[#f5f6f1] p-3"><p className="text-2xl font-extrabold">{bookings.filter(b=>b.status==="Requested"||b.status==="Confirmed").length}</p><p className="text-xs text-[#68776b]">Active bookings</p></div><div className="rounded-xl bg-[#f5f6f1] p-3"><p className="text-2xl font-extrabold">{reviews.filter(r=>r.author==="You").length}</p><p className="text-xs text-[#68776b]">Reviews written</p></div></div><h4 className="mt-5 font-bold">Your recent reviews</h4>{reviews.filter(r=>r.author==="You").map(r=><div key={r.id} className="mt-2 rounded-xl bg-[#f7f8f3] p-3"><p className="text-sm font-bold">{r.provider} · {"★".repeat(r.rating)}</p><p className="mt-1 text-sm text-[#68776b]">{r.comment}</p></div>)}{reviews.filter(r=>r.author==="You").length===0&&<p className="mt-2 text-sm text-[#849087]">Reviews you leave after completed bookings will appear here.</p>}</section></div>:
+<div className="mt-6 grid gap-6 md:grid-cols-2">
+<section className="rounded-2xl border border-[#e8e9df] bg-white p-5"><div className="flex items-center justify-between"><h3 className="text-lg font-extrabold">Availability calendar</h3><span className="rounded-full bg-[#edf4ec] px-3 py-1 text-xs font-bold text-[#39764c]">Demo schedule</span></div><p className="mt-1 text-sm text-[#68776b]">Choose the days and hours customers can request appointments.</p><h4 className="mt-5 text-sm font-bold">Working days</h4><div className="mt-2 flex flex-wrap gap-2">{weekdays.map(d=><button key={d} onClick={()=>{setWorkingDays(old=>old.includes(d)?old.filter(x=>x!==d):[...old,d]);setAvailabilitySaved(false)}} className={"rounded-full px-3 py-2 text-sm font-semibold "+(workingDays.includes(d)?"bg-[#245b3b] text-white":"border bg-white text-[#536458]")}>{d}</button>)}</div><div className="mt-5 grid grid-cols-2 gap-3"><label className="text-sm font-semibold">Start time<select value={startTime} onChange={e=>{setStartTime(e.target.value);setAvailabilitySaved(false)}} className="mt-1 w-full rounded-xl border bg-white p-3">{slots.slice(0,5).map(s=><option key={s}>{s}</option>)}</select></label><label className="text-sm font-semibold">End time<select value={endTime} onChange={e=>{setEndTime(e.target.value);setAvailabilitySaved(false)}} className="mt-1 w-full rounded-xl border bg-white p-3">{["12:00 PM","1:30 PM","3:00 PM","4:30 PM","5:00 PM","6:00 PM","7:00 PM"].map(s=><option key={s}>{s}</option>)}</select></label></div><button onClick={()=>setAvailabilitySaved(true)} disabled={!workingDays.length} className="mt-5 w-full rounded-full bg-[#245b3b] px-5 py-3 font-bold text-white disabled:opacity-40">Save availability</button>{availabilitySaved&&<p className="mt-3 rounded-xl bg-[#edf4ec] p-3 text-sm text-[#245b3b]">Saved for demo: {workingDays.join(", ")} · {startTime}–{endTime}.</p>}<p className="mt-3 text-xs text-[#849087]">Prototype only. Does not sync to a live calendar.</p></section>
+<section className="rounded-2xl border border-[#e8e9df] bg-white p-5"><h3 className="text-lg font-extrabold">Business verification</h3><p className="mt-1 text-sm text-[#68776b]">Track sample verification progress.</p><div className="mt-4 rounded-xl border border-[#edf0e9] p-4"><div className="flex items-center justify-between"><span className="text-sm font-bold">Background check</span><span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">{verification}</span></div><p className="mt-2 text-xs text-[#849087]">Demo status only. No background check has been ordered or completed.</p><div className="mt-4 grid gap-2">{["Not started","Consent received","In review","Verified"].map((s,i)=><button key={s} onClick={()=>setVerification(s)} className={"flex items-center justify-between rounded-lg px-3 py-2 text-left text-sm "+(verification===s?"bg-[#edf4ec] font-bold text-[#245b3b]":"bg-[#f7f8f3] text-[#68776b]")}><span>{i+1}. {s}</span><span>{verification===s?"● Selected":"○"}</span></button>)}</div></div><div className="mt-5 rounded-xl bg-[#f7f8f3] p-4"><h4 className="font-bold">Profile checklist</h4><ul className="mt-2 space-y-2 text-sm text-[#536458]"><li>✓ Business registration submitted (demo)</li><li>✓ Service category selected</li><li>○ Add portfolio photos</li><li>○ Connect a real verification provider</li></ul></div></section>
+<section className="rounded-2xl border border-[#e8e9df] bg-white p-5 md:col-span-2"><h3 className="text-lg font-extrabold">Booking requests</h3><p className="mt-1 text-sm text-[#68776b]">Sample customer appointments across the demo marketplace.</p><div className="mt-4 space-y-2">{bookings.filter(b=>b.status!=="Cancelled").map(b=><div key={b.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#edf0e9] p-3"><div><p className="font-bold">{b.provider} · {b.service}</p><p className="text-sm text-[#68776b]">{prettyDate(b.date)} at {b.time} · {b.price}</p></div><div className="flex items-center gap-2"><span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">{b.status}</span><button onClick={()=>setBookings(old=>old.map(x=>x.id===b.id?{...x,status:"Confirmed"}:x))} className="rounded-full bg-[#245b3b] px-3 py-2 text-xs font-bold text-white">Confirm</button><button onClick={()=>cancelBooking(b.id)} className="rounded-full border border-red-200 px-3 py-2 text-xs font-bold text-red-700">Decline</button></div></div>)}</div></section>
+<section className="rounded-2xl border border-[#e8e9df] bg-white p-5 md:col-span-2"><h3 className="text-lg font-extrabold">Customer reviews</h3><p className="mt-1 text-sm text-[#68776b]">Feedback displayed on provider profiles.</p><div className="mt-4 grid gap-3 sm:grid-cols-2">{reviews.map(r=><div key={r.id} className="rounded-xl bg-[#f7f8f3] p-4"><div className="flex justify-between text-sm font-bold"><span>{r.author} · {r.provider}</span><span>{"★".repeat(r.rating)}</span></div><p className="mt-2 text-sm text-[#68776b]">{r.comment}</p></div>)}</div></section>
+</div>}
+</div></div>}
 
-  async function useMyLocation() {
-    setLocationMessage("");
-    if (!navigator.geolocation) {
-      setLocationMessage("Location isn't available in this browser. Enter a ZIP code instead.");
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => setLocation(`Your location (${coords.latitude.toFixed(2)}, ${coords.longitude.toFixed(2)})`),
-      () => setLocationMessage("Location permission wasn't granted. You can enter your ZIP code instead."),
-      { enableHighAccuracy: false, timeout: 8000 }
-    );
-  }
-
-  function applyZip() {
-    if (!/^\d{5}$/.test(zip.trim())) {
-      setLocationMessage("Enter a valid 5-digit ZIP code.");
-      return;
-    }
-    setLocation(`ZIP ${zip.trim()}`);
-    setLocationMessage("Location updated for this demo.");
-  }
-
-  function openProvider(provider: Provider) {
-    setActiveProvider(provider);
-    setBookingDate(todayString());
-    setBookingTime("");
-    setBookingConfirmed(false);
-  }
-
-  function closeProvider() {
-    setActiveProvider(null);
-    setBookingConfirmed(false);
-  }
-
-  function openSignup(type: "customer" | "business") {
-    setSignupType(type);
-    setSignupDone(false);
-    setJoinOpen(false);
-  }
-
-  return (
-    <main className="min-h-screen bg-[#faf9f5] text-[#243c2d]">
-      <nav className="flex items-center justify-between border-b border-[#e8e9df] bg-white px-6 py-5 md:px-16">
-        <a href="#" className="text-2xl font-black tracking-tight text-[#245b3b]">Up&<span className="text-[#e5a64c]">comer</span></a>
-        <div className="hidden items-center gap-8 text-sm font-medium md:flex">
-          <a href="#discover" className="hover:text-green-700">Discover</a>
-          <a href="#categories" className="hover:text-green-700">Categories</a>
-          <a href="#providers" className="hover:text-green-700">Find a Pro</a>
-        </div>
-        <button onClick={() => setJoinOpen(true)} className="rounded-full border border-[#245b3b] px-5 py-2 text-sm font-semibold text-[#245b3b] hover:bg-[#245b3b] hover:text-white">Sign up / Log in</button>
-      </nav>
-
-      <section id="discover" className="px-6 py-16 md:px-16 md:py-24">
-        <div className="mx-auto max-w-6xl">
-          <div className="max-w-3xl">
-            <p className="mb-5 text-sm font-bold uppercase tracking-[0.2em] text-[#b47b32]">Discover emerging local talent</p>
-            <h1 className="text-5xl font-black leading-tight tracking-tight md:text-7xl">Discover your next<span className="block text-[#39764c]">favorite local pro.</span></h1>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-[#68776b]">Find talented up-and-comers offering quality services at prices that make sense. Support local talent while they're on the rise.</p>
-          </div>
-
-          <div className="mt-10 flex max-w-3xl flex-col gap-3 rounded-2xl bg-white p-3 shadow-lg shadow-green-950/5 sm:flex-row">
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="What service are you looking for?" className="min-w-0 flex-1 rounded-xl bg-[#f5f6f1] px-5 py-4 text-sm outline-none focus:ring-2 focus:ring-green-700" />
-            <a href="#providers" className="rounded-xl bg-[#245b3b] px-8 py-4 text-center font-bold text-white hover:bg-[#19452c]">Find a pro →</a>
-          </div>
-
-          <div className="mt-5 max-w-3xl rounded-2xl border border-[#e8e9df] bg-white p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div><p className="text-xs font-bold uppercase tracking-wider text-[#b47b32]">Your search area</p><p className="mt-1 font-semibold">📍 {location}</p></div>
-              <button onClick={useMyLocation} className="rounded-full border border-[#245b3b] px-4 py-2 text-sm font-semibold text-[#245b3b] hover:bg-[#edf4ec]">Use my location</button>
-            </div>
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-              <input value={zip} onChange={(e) => setZip(e.target.value)} inputMode="numeric" maxLength={5} placeholder="Enter ZIP code" className="w-full rounded-xl bg-[#f5f6f1] px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-green-700 sm:max-w-xs" />
-              <button onClick={applyZip} className="rounded-xl bg-[#245b3b] px-5 py-3 text-sm font-bold text-white">Update location</button>
-            </div>
-            {locationMessage && <p className="mt-2 text-xs text-[#8a6330]">{locationMessage}</p>}
-            <p className="mt-2 text-xs text-[#849087]">Demo note: location is used only in this page session. Provider distances are sample data.</p>
-          </div>
-          <p className="mt-4 text-sm text-[#849087]">Great services. Fair prices. The next generation of local talent.</p>
-        </div>
-      </section>
-
-      <section id="categories" className="border-y border-[#e8e9df] bg-white px-6 py-14 md:px-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
-            <div><p className="text-sm font-bold uppercase tracking-widest text-[#b47b32]">Explore</p><h2 className="mt-2 text-3xl font-extrabold">What do you need done?</h2></div>
-            <button onClick={() => setSelected("All")} className="text-sm font-semibold text-[#39764c]">View all services →</button>
-          </div>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-            {categories.map((category) => <button key={category.name} onClick={() => { setSelected(category.name); document.getElementById("providers")?.scrollIntoView({ behavior: "smooth" }); }} className={`rounded-2xl border p-6 text-left transition hover:-translate-y-1 hover:shadow-md ${selected === category.name ? "border-[#39764c] bg-[#edf4ec]" : "border-[#e8e9df] bg-[#faf9f5]"}`}><span className="text-3xl">{category.icon}</span><p className="mt-4 font-bold">{category.name}</p><p className="mt-1 text-xs text-[#849087]">Explore pros →</p></button>)}
-          </div>
-        </div>
-      </section>
-
-      <section id="providers" className="px-6 py-16 md:px-16">
-        <div className="mx-auto max-w-6xl">
-          <p className="text-sm font-bold uppercase tracking-widest text-[#b47b32]">Meet the talent</p>
-          <div className="mt-2 flex flex-wrap items-center justify-between gap-4"><h2 className="text-3xl font-extrabold">Local pros on the rise.</h2><button onClick={() => setSelected("All")} className="text-sm font-semibold text-[#39764c]">Clear filters</button></div>
-          <p className="mt-3 text-[#68776b]">Discover skilled providers building their businesses and reputation.</p>
-          <div className="mt-8 flex flex-wrap gap-2">{["All", ...categories.map((c) => c.name)].map((name) => <button key={name} onClick={() => setSelected(name)} className={`rounded-full px-4 py-2 text-sm font-semibold ${selected === name ? "bg-[#245b3b] text-white" : "border border-[#dfe4dc] bg-white text-[#536458] hover:bg-[#edf4ec]"}`}>{name}</button>)}</div>
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((provider) => <article key={provider.name} className="overflow-hidden rounded-2xl border border-[#e8e9df] bg-white transition hover:-translate-y-1 hover:shadow-lg">
-              <div className={`flex h-40 items-center justify-center ${provider.color}`}><span className="text-7xl">{provider.emoji}</span></div>
-              <div className="p-6">
-                <div className="flex items-center justify-between"><span className="rounded-full bg-[#edf4ec] px-3 py-1 text-xs font-bold text-[#39764c]">Emerging provider</span><span className="text-sm font-bold">★ {provider.rating}</span></div>
-                <h3 className="mt-4 text-xl font-extrabold">{provider.name}</h3><p className="mt-1 text-sm text-[#68776b]">{provider.description}</p>
-                <p className="mt-3 text-xs text-[#849087]">📍 {provider.location} · {provider.distance}</p>
-                <div className="mt-5 flex items-center justify-between border-t border-[#edf0e9] pt-4"><p className="text-sm text-[#68776b]">From <span className="text-lg font-extrabold text-[#245b3b]">{provider.price}</span></p><button onClick={() => openProvider(provider)} className="rounded-full bg-[#245b3b] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#19452c]">View profile →</button></div>
-              </div>
-            </article>)}
-          </div>
-          {filtered.length === 0 && <p className="mt-10 rounded-xl bg-white p-8 text-center text-[#68776b]">No providers found. Try another search or category.</p>}
-        </div>
-      </section>
-
-      <section className="bg-[#245b3b] px-6 py-16 text-center text-white md:px-16">
-        <h2 className="text-3xl font-extrabold">Good at what you do?</h2><p className="mx-auto mt-4 max-w-xl leading-7 text-green-100">Build your reputation, find new customers, and grow your business with Up&comer.</p>
-        <button onClick={() => openSignup("business")} className="mt-7 rounded-full bg-[#f0bd70] px-7 py-3 font-bold text-[#243c2d] hover:bg-[#f5cb8d]">Become a provider</button>
-      </section>
-      <footer className="bg-[#193f2a] px-6 py-8 text-center text-sm text-green-100">© 2026 Up&comer. Discover talent on the rise.</footer>
-
-      {joinOpen && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setJoinOpen(false)}><div className="w-full max-w-md rounded-3xl bg-white p-7 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-start justify-between"><div><p className="text-xs font-bold uppercase tracking-widest text-[#b47b32]">Join the community</p><h2 className="mt-2 text-2xl font-extrabold">How will you use Up&comer?</h2></div><button onClick={() => setJoinOpen(false)} className="text-2xl text-gray-400">×</button></div>
-        <div className="mt-6 grid gap-3"><button onClick={() => openSignup("customer")} className="rounded-2xl border border-[#dfe4dc] p-5 text-left hover:border-[#39764c] hover:bg-[#f3f7f1]"><span className="text-2xl">🛍️</span><p className="mt-2 font-bold">I'm a customer</p><p className="text-sm text-[#68776b]">Discover and book local services.</p></button><button onClick={() => openSignup("business")} className="rounded-2xl border border-[#dfe4dc] p-5 text-left hover:border-[#39764c] hover:bg-[#f3f7f1]"><span className="text-2xl">🚀</span><p className="mt-2 font-bold">I'm a service provider</p><p className="text-sm text-[#68776b]">List my business and find customers.</p></button></div>
-      </div></div>}
-
-      {signupType && <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4" onClick={() => setSignupType(null)}><div className="my-8 w-full max-w-xl rounded-3xl bg-white p-7 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-start justify-between"><div><p className="text-xs font-bold uppercase tracking-widest text-[#b47b32]">{signupType === "customer" ? "Customer registration" : "Provider registration"}</p><h2 className="mt-2 text-2xl font-extrabold">{signupDone ? "You're on the list!" : signupType === "customer" ? "Create your customer profile" : "Create your business profile"}</h2></div><button onClick={() => setSignupType(null)} className="text-2xl text-gray-400">×</button></div>
-        {signupDone ? <div className="py-8"><div className="text-5xl">🎉</div><p className="mt-4 text-[#536458]">Your demo profile has been submitted. No account was created and no information was sent to a server.</p><button onClick={() => setSignupType(null)} className="mt-6 rounded-full bg-[#245b3b] px-6 py-3 font-bold text-white">Back to Up&comer</button></div> :
-        <form className="mt-6 grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); setSignupDone(true); }}>
-          <label className="text-sm font-semibold">First name<input required placeholder="First name" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal outline-none focus:ring-2 focus:ring-green-700" /></label>
-          <label className="text-sm font-semibold">Last name<input required placeholder="Last name" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal outline-none focus:ring-2 focus:ring-green-700" /></label>
-          <label className="text-sm font-semibold">Email<input required type="email" placeholder="you@example.com" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal outline-none focus:ring-2 focus:ring-green-700" /></label>
-          <label className="text-sm font-semibold">Phone<input required type="tel" placeholder="(555) 555-5555" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal outline-none focus:ring-2 focus:ring-green-700" /></label>
-          {signupType === "business" && <><label className="text-sm font-semibold sm:col-span-2">Business name<input required placeholder="Your business name" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal outline-none focus:ring-2 focus:ring-green-700" /></label><label className="text-sm font-semibold">Business category<select required defaultValue="" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal outline-none focus:ring-2 focus:ring-green-700"><option value="" disabled>Select a category</option>{categories.map(c => <option key={c.name}>{c.name}</option>}<option>Other</option></select></label><label className="text-sm font-semibold">Years in business<select defaultValue="Just starting" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal outline-none focus:ring-2 focus:ring-green-700"><option>Just starting</option><option>Less than 1 year</option><option>1–3 years</option><option>3+ years</option></select></label></>}
-          <label className="text-sm font-semibold sm:col-span-2">Street address<input required placeholder="Street address" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal outline-none focus:ring-2 focus:ring-green-700" /></label>
-          <label className="text-sm font-semibold">City<input required placeholder="City" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal outline-none focus:ring-2 focus:ring-green-700" /></label>
-          <label className="text-sm font-semibold">State<input required placeholder="State" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal outline-none focus:ring-2 focus:ring-green-700" /></label>
-          <label className="text-sm font-semibold">ZIP code<input required inputMode="numeric" pattern="[0-9]{5}" maxLength={5} placeholder="ZIP code" className="mt-1 w-full rounded-xl bg-[#f5f6f1] p-3 font-normal outline-none focus:ring-2 focus:ring-green-700" /></label>
-          {signupType === "business" && <label className="flex items-start gap-3 rounded-xl bg-[#f5f6f1] p-4 text-sm sm:col-span-2"><input required type="checkbox" className="mt-1 accent-[#245b3b]" /><span>I consent to Up&comer conducting a background check, subject to applicable disclosures and authorization. <span className="block text-xs text-[#849087]">Demo only: this checkbox does not initiate a background check.</span></span></label>}
-          <p className="text-xs text-[#849087] sm:col-span-2">Demo form only. Do not enter sensitive personal information. Details are not saved or transmitted.</p>
-          <button type="submit" className="rounded-full bg-[#245b3b] px-6 py-3 font-bold text-white sm:col-span-2">Submit demo registration</button>
-        </form>}
-      </div></div>}
-
-      {activeProvider && <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4" onClick={closeProvider}><div className="my-8 w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl md:p-8" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-start justify-between"><div><p className="text-xs font-bold uppercase tracking-widest text-[#b47b32]">Emerging local provider</p><h2 className="mt-2 text-2xl font-extrabold">{activeProvider.name}</h2><p className="mt-1 text-sm text-[#68776b]">{activeProvider.service} · ★ {activeProvider.rating} · {activeProvider.location}</p></div><button onClick={closeProvider} className="text-2xl text-gray-400">×</button></div>
-        <div className={`mt-5 flex h-28 items-center justify-center rounded-2xl ${activeProvider.color}`}><span className="text-6xl">{activeProvider.emoji}</span></div>
-        <p className="mt-4 leading-7 text-[#536458]">{activeProvider.bio}</p>
-        <div className="mt-5 rounded-2xl border border-[#e8e9df] p-5">
-          {bookingConfirmed ? <div className="py-5 text-center"><div className="text-4xl">✅</div><h3 className="mt-3 text-xl font-extrabold">Booking request confirmed!</h3><p className="mt-2 text-sm text-[#68776b]">Demo booking with {activeProvider.name} for {bookingDate} at {bookingTime}. No real appointment was created.</p><button onClick={closeProvider} className="mt-5 rounded-full bg-[#245b3b] px-6 py-3 font-bold text-white">Done</button></div> : <>
-            <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-lg font-extrabold">Book an appointment</h3><p className="font-bold text-[#245b3b]">From {activeProvider.price}</p></div>
-            <label className="mt-4 block text-sm font-semibold">Choose a date<input type="date" min={todayString()} value={bookingDate} onChange={(e) => { setBookingDate(e.target.value); setBookingTime(""); }} className="mt-2 w-full rounded-xl border border-[#dfe4dc] bg-[#faf9f5] p-3 outline-none focus:ring-2 focus:ring-green-700" /></label>
-            <p className="mt-4 text-sm font-semibold">Available times</p>
-            <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">{slots.map((slot, i) => <button key={slot} onClick={() => setBookingTime(slot)} className={`rounded-xl border px-3 py-3 text-sm font-semibold ${bookingTime === slot ? "border-[#245b3b] bg-[#245b3b] text-white" : "border-[#dfe4dc] hover:border-[#39764c] hover:bg-[#edf4ec]"}`}>{slot}{i === 2 ? " · Popular" : ""}</button>)}</div>
-            <p className="mt-3 text-xs text-[#849087]">Sample availability for demonstration. Provider schedules are not connected to a live calendar.</p>
-            <button disabled={!bookingDate || !bookingTime} onClick={() => setBookingConfirmed(true)} className="mt-5 w-full rounded-full bg-[#245b3b] px-6 py-3 font-bold text-white disabled:cursor-not-allowed disabled:opacity-40">Request booking</button>
-          </>}
-        </div>
-      </div></div>}
-    </main>
-  );
+{reviewTarget&&<div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4" onClick={()=>setReviewTarget(null)}><div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl" onClick={e=>e.stopPropagation()}><h3 className="text-xl font-extrabold">Review {reviewTarget.provider}</h3><p className="mt-1 text-sm text-[#68776b]">How was your {reviewTarget.service} experience?</p><label className="mt-4 block text-sm font-semibold">Rating<select value={reviewRating} onChange={e=>setReviewRating(Number(e.target.value))} className="mt-1 w-full rounded-xl border p-3">{[5,4,3,2,1].map(n=><option key={n} value={n}>{n} stars</option>)}</select></label><label className="mt-4 block text-sm font-semibold">Your review<textarea value={reviewComment} onChange={e=>setReviewComment(e.target.value)} rows={4} placeholder="Share a few details..." className="mt-1 w-full rounded-xl border p-3 font-normal"/></label><div className="mt-4 flex gap-2"><button disabled={!reviewComment.trim()} onClick={submitReview} className="flex-1 rounded-full bg-[#245b3b] px-4 py-3 font-bold text-white disabled:opacity-40">Post review</button><button onClick={()=>setReviewTarget(null)} className="rounded-full border px-4 py-3 font-semibold">Cancel</button></div></div></div>}
+</main>
 }
