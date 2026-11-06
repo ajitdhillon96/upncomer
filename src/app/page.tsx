@@ -17,11 +17,11 @@ const categories = [
 ];
 
 const providers: Provider[] = [
-  { name: "Marcus Green", service: "Lawn Care", description: "Lawn care & garden maintenance", price: "$35", rating: "4.9", emoji: "🌿", location: "Arlington, VA", color: "bg-green-100", bio: "Detail-oriented lawn care and garden maintenance. Building a local business one great yard at a time.", distance: "2.4 miles away", days: ["Mon", "Tue", "Wed", "Fri", "Sat"] },
-  { name: "Sofia Martinez", service: "Hair", description: "Modern cuts & styling", price: "$45", rating: "5.0", emoji: "💇‍♀️", location: "Alexandria, VA", color: "bg-pink-100", bio: "Specializing in modern cuts, styling, and helping clients feel their best.", distance: "4.1 miles away", days: ["Tue", "Wed", "Thu", "Fri", "Sat"] },
-  { name: "Jordan Blake", service: "Personal Training", description: "Personal fitness coaching", price: "$30", rating: "4.9", emoji: "🏋️", location: "Falls Church, VA", color: "bg-orange-100", bio: "Supportive one-on-one fitness coaching for all experience levels.", distance: "6.8 miles away", days: ["Mon", "Wed", "Thu", "Sat", "Sun"] },
-  { name: "Alex Rivera", service: "Car Detailing", description: "Mobile auto detailing", price: "$50", rating: "4.8", emoji: "🚘", location: "Fairfax, VA", color: "bg-blue-100", bio: "Mobile detailing that brings a clean, polished finish right to your driveway.", distance: "8.2 miles away", days: ["Mon", "Tue", "Thu", "Fri", "Sat"] },
-  { name: "Chris Taylor", service: "Moving", description: "Local moving & heavy lifting", price: "$40", rating: "4.9", emoji: "🚚", location: "McLean, VA", color: "bg-yellow-100", bio: "Reliable help with local moves, loading, unloading, and heavy lifting.", distance: "9.5 miles away", days: ["Tue", "Wed", "Fri", "Sat", "Sun"] },
+  { name: "Marcus Green", service: "Lawn Care", description: "Lawn care & garden maintenance", price: "$35", rating: "4.9", emoji: "🌿", location: "Los Angeles, CA", color: "bg-green-100", bio: "Detail-oriented lawn care and garden maintenance. Building a local business one great yard at a time.", distance: "2.4 miles away", days: ["Mon", "Tue", "Wed", "Fri", "Sat"] },
+  { name: "Sofia Martinez", service: "Hair", description: "Modern cuts & styling", price: "$45", rating: "5.0", emoji: "💇‍♀️", location: "Los Angeles, CA", color: "bg-pink-100", bio: "Specializing in modern cuts, styling, and helping clients feel their best.", distance: "4.1 miles away", days: ["Tue", "Wed", "Thu", "Fri", "Sat"] },
+  { name: "Jordan Blake", service: "Personal Training", description: "Personal fitness coaching", price: "$30", rating: "4.9", emoji: "🏋️", location: "Los Angeles, CA", color: "bg-orange-100", bio: "Supportive one-on-one fitness coaching for all experience levels.", distance: "6.8 miles away", days: ["Mon", "Wed", "Thu", "Sat", "Sun"] },
+  { name: "Alex Rivera", service: "Car Detailing", description: "Mobile auto detailing", price: "$50", rating: "4.8", emoji: "🚘", location: "Los Angeles, CA", color: "bg-blue-100", bio: "Mobile detailing that brings a clean, polished finish right to your driveway.", distance: "8.2 miles away", days: ["Mon", "Tue", "Thu", "Fri", "Sat"] },
+  { name: "Chris Taylor", service: "Moving", description: "Local moving & heavy lifting", price: "$40", rating: "4.9", emoji: "🚚", location: "Los Angeles, CA", color: "bg-yellow-100", bio: "Reliable help with local moves, loading, unloading, and heavy lifting.", distance: "9.5 miles away", days: ["Tue", "Wed", "Fri", "Sat", "Sun"] },
 ];
 
 const slots = ["9:00 AM", "10:30 AM", "12:00 PM", "1:30 PM", "3:00 PM", "4:30 PM"];
@@ -34,7 +34,7 @@ function todayString() {
 export default function Home() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState("All");
-  const [location, setLocation] = useState("Arlington, VA");
+  const [location, setLocation] = useState("Los Angeles, CA");
   const [zip, setZip] = useState("");
   const [locationMessage, setLocationMessage] = useState("");
   const [activeProvider, setActiveProvider] = useState<Provider | null>(null);
