@@ -58,6 +58,7 @@ export default function HomeScreen() {
   const [experience, setExperience] = useState<'choice' | 'customer' | 'business'>('choice');
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedProvider, setSelectedProvider] = useState<(typeof providers)[number] | null>(null);
   const [openBusinessFaq, setOpenBusinessFaq] = useState<number | null>(null);
   const businessScrollRef = useRef<ScrollView>(null);
 
@@ -211,6 +212,69 @@ export default function HomeScreen() {
     );
   }
 
+  if (selectedProvider) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <StatusBar barStyle="light-content" />
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.profileScreen}>
+          <Pressable
+            style={styles.profileBackButton}
+            onPress={() => setSelectedProvider(null)}
+            accessibilityRole="button"
+            accessibilityLabel="Back to providers"
+          >
+            <Text style={styles.backText}>‹  Back to providers</Text>
+          </Pressable>
+
+          <Image
+            source={{ uri: photo(selectedProvider.image) }}
+            style={styles.profileHeroImage}
+          />
+          <View style={styles.profileHeaderRow}>
+            <View style={styles.profileHeaderCopy}>
+              <Text style={styles.profileName}>{selectedProvider.name}</Text>
+              <Text style={styles.profileService}>{selectedProvider.service}</Text>
+            </View>
+            <Text style={styles.profileRating}>★ {selectedProvider.rating}</Text>
+          </View>
+
+          <View style={styles.profilePriceCard}>
+            <Text style={styles.profilePriceLabel}>STARTING PRICE</Text>
+            <Text style={styles.profilePrice}>From {selectedProvider.price}</Text>
+            <Text style={styles.profilePriceNote}>Final price can vary by project details.</Text>
+          </View>
+
+          <Text style={styles.profileSectionTitle}>About this provider</Text>
+          <Text style={styles.profileBodyText}>
+            Independent local talent building a reputation through quality work, clear communication, and affordable upfront pricing.
+          </Text>
+
+          <Text style={styles.profileSectionTitle}>Sample reviews</Text>
+          <View style={styles.reviewCard}>
+            <Text style={styles.reviewStars}>★★★★★</Text>
+            <Text style={styles.reviewText}>“Friendly, professional, and easy to work with.”</Text>
+            <Text style={styles.reviewAuthor}>— Demo customer</Text>
+          </View>
+          <View style={styles.reviewCard}>
+            <Text style={styles.reviewStars}>★★★★★</Text>
+            <Text style={styles.reviewText}>“The service was completed exactly as described.”</Text>
+            <Text style={styles.reviewAuthor}>— Demo customer</Text>
+          </View>
+
+          <Pressable
+            style={styles.profilePrimaryButton}
+            onPress={() => {}}
+            accessibilityRole="button"
+            accessibilityLabel={`Book ${selectedProvider.name}`}
+          >
+            <Text style={styles.profilePrimaryButtonText}>Book this provider</Text>
+          </Pressable>
+          <Text style={styles.demoNote}>Demo only — booking and payments are not connected yet.</Text>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content"/>
@@ -287,6 +351,9 @@ export default function HomeScreen() {
                     <Pressable
                       key={provider.name}
                       style={styles.providerCard}
+                      onPress={() => setSelectedProvider(provider)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`View profile for ${provider.name}`}
                     >
                       <Image
                         source={{ uri: photo(provider.image) }}
@@ -386,6 +453,128 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  profileScreen: {
+    paddingHorizontal: SIDE,
+    paddingTop: 18,
+    paddingBottom: 40,
+  },
+  profileBackButton: {
+    marginBottom: 16,
+  },
+  profileHeroImage: {
+    width: '100%',
+    height: 260,
+    borderRadius: 16,
+    backgroundColor: CARD,
+  },
+  profileHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginTop: 17,
+  },
+  profileHeaderCopy: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  profileName: {
+    color: '#FFFFFF',
+    fontSize: 28,
+    fontWeight: '900',
+    letterSpacing: -0.8,
+  },
+  profileService: {
+    color: '#AAA5B3',
+    fontSize: 13,
+    marginTop: 6,
+  },
+  profileRating: {
+    color: PURPLE,
+    fontSize: 14,
+    fontWeight: '800',
+    marginTop: 4,
+  },
+  profilePriceCard: {
+    backgroundColor: '#211C2D',
+    borderWidth: 1,
+    borderColor: '#51416D',
+    borderRadius: 14,
+    padding: 16,
+    marginTop: 20,
+  },
+  profilePriceLabel: {
+    color: '#C8B4F6',
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 1.3,
+  },
+  profilePrice: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    fontWeight: '900',
+    marginTop: 6,
+  },
+  profilePriceNote: {
+    color: '#AAA5B3',
+    fontSize: 11,
+    marginTop: 5,
+  },
+  profileSectionTitle: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '800',
+    marginTop: 26,
+    marginBottom: 9,
+  },
+  profileBodyText: {
+    color: '#AAA5B3',
+    fontSize: 13,
+    lineHeight: 21,
+  },
+  reviewCard: {
+    backgroundColor: CARD,
+    borderWidth: 1,
+    borderColor: '#393541',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 10,
+  },
+  reviewStars: {
+    color: PURPLE,
+    fontSize: 12,
+    letterSpacing: 1,
+  },
+  reviewText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 8,
+  },
+  reviewAuthor: {
+    color: '#85818E',
+    fontSize: 10,
+    marginTop: 8,
+  },
+  profilePrimaryButton: {
+    backgroundColor: PURPLE,
+    borderRadius: 11,
+    paddingVertical: 15,
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  profilePrimaryButtonText: {
+    color: '#17121F',
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  demoNote: {
+    color: '#85818E',
+    fontSize: 10,
+    lineHeight: 16,
+    textAlign: 'center',
+    marginTop: 9,
+  },
+
   choiceScreen: {
     flex: 1,
     justifyContent: 'center',
